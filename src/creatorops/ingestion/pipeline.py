@@ -22,7 +22,10 @@ def read_manifest(path: Path) -> list[dict]:
     return sorted(rows, key=lambda r: (r["doc_id"], r["snapshot_date"] or r["doc_date"]))
 
 
-def build_chunk_dicts(row: dict, text: str, version: int, text_hash: str, chunker: str):
+def build_chunk_dicts(
+    row: dict, text: str, version: int, text_hash: str, chunker: str, context_header=False
+):
+    """context_header=True puts "title > section" in front of the indexed text (ablation)."""
     chunks = structure_chunks(text) if chunker == "structure" else fixed_chunks(text)
     now = datetime.now().isoformat(timespec="seconds")
     result = []
@@ -52,13 +55,23 @@ def build_chunk_dicts(row: dict, text: str, version: int, text_hash: str, chunke
                 if row["doc_type"] == "contract"
                 else None,
                 "file_path": row["file_path"],
-                "text": c.text,
+                "text": f"{row['title']} > {c.section_path}\n{c.text}"
+                if context_header
+                else c.text,
             }
         )
     return result
 
 
-def ingest(manifest_path, data_dir, registry: Registry, store, embedder, chunker="structure"):
+def ingest(
+    manifest_path,
+    data_dir,
+    registry: Registry,
+    store,
+    embedder,
+    chunker="structure",
+    context_header=False,
+):
     """Ingest every file of the manifest. Returns a small report dict."""
     report = {"new": 0, "updated": 0, "unchanged": 0, "skipped": 0, "chunks": 0}
     for row in read_manifest(manifest_path):
@@ -77,7 +90,7 @@ def ingest(manifest_path, data_dir, registry: Registry, store, embedder, chunker
         if previous is not None:
             store.mark_not_latest(row["doc_id"], previous, valid_from)
 
-        chunks = build_chunk_dicts(row, text, version, text_hash, chunker)
+        chunks = build_chunk_dicts(row, text, version, text_hash, chunker, context_header)
         vectors = embedder.embed_documents([c["text"] for c in chunks])
         store.upsert(chunks, vectors)
         registry.save_chunks(chunks)
