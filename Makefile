@@ -14,7 +14,16 @@ test:
 
 check: lint test
 
+db:
+	uv run python scripts/generate_analytics_db.py
+
+corpus: db
+	uv run python scripts/download_corpus.py
+
+ingest:
+	uv run python scripts/ingest.py
+
 qdrant:
 	docker compose up -d qdrant
 
-.PHONY: install lint format test check qdrant
+.PHONY: install lint format test check db corpus ingest qdrant
