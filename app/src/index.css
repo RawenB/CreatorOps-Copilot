@@ -418,7 +418,8 @@ tbody tr:hover { background: #fafbff; }
 .sev-medium .sev-icon { background: #ec835a; }
 .sev-info .sev-icon { background: #8a93a6; }
 .inline-bar { position: relative; display: flex; align-items: center; gap: 8px; min-width: 140px; }
-.inline-bar div { height: 8px; border-radius: 0 4px 4px 0; background: #4f46e5; max-width: 80px; flex-shrink: 0; }
+.inline-track { width: 90px; flex-shrink: 0; }
+.inline-track div { height: 8px; border-radius: 0 4px 4px 0; background: #4f46e5; }
 .inline-bar span { font-variant-numeric: tabular-nums; font-size: 12.5px; }
 th.num { text-align: right; }
 
