@@ -30,3 +30,28 @@ Planted anomalies (so analytics questions have a clear answer):
 
 Limitations: the distributions are simple and only roughly realistic. They are good enough to test SQL and
 hybrid questions, not to draw real marketing conclusions.
+
+## Document corpus (`data/manifest.csv`)
+
+Built by `scripts/download_corpus.py` from `data/sources.csv`. Raw files are not committed (`data/raw/`),
+only the manifest. 158 documents, 170 files (some documents have several dated snapshots).
+
+| Group | Documents | Source | License |
+|---|---|---|---|
+| Instagram / Meta policies | 18 | Meta Transparency Center (Community Standards, Advertising Standards), Meta Terms | copyrighted, used for non-commercial research only |
+| TikTok policies | 3 | Branded Content Policy, Community Guidelines, ad creatives policy | copyrighted, research only |
+| YouTube policies | 4 | Paid product placements, monetization policies, advertiser-friendly guidelines, Community Guidelines | copyrighted, research only |
+| Regulations | 7 | FTC Endorsement Guides (16 CFR 255, eCFR), FTC influencer guides, ASA/CAP guide and Code sections 2 and 18, EU Digital Services Act | public domain (US) / EU reuse policy / ASA copyright |
+| Contracts (real) | 100 | random sample (seed 42) of CUAD v1 full contract texts | CC BY 4.0 |
+| Contracts (synthetic) | 20 | generated from a template + `contracts_index` | project-generated |
+| Agency SOPs (synthetic) | 6 | written by hand (`data/sops/`) | project-generated |
+
+13 documents have more than one snapshot (for example the FTC Endorsement Guides 2016 vs 2023, the TikTok
+Branded Content Policy 2024 vs 2026, several Meta Community Standards 2024 vs 2026). Snapshots with the same
+text are not counted as new versions during ingestion.
+
+Known issues:
+- Instagram help-center pages could not be used (JavaScript-only pages), see decisions.md #11
+- the ASA influencer guide page is short: the full guide is a PDF that is not included
+- the EU DSA is a very long legal text and produces many chunks compared to the other documents
+- some archived snapshots were empty and are skipped by ingestion

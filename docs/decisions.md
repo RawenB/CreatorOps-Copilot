@@ -48,3 +48,28 @@ Start with `bge-base-en-v1.5` (small, fast on CPU). Compare with `bge-m3` in one
 
 ## 10. Dependencies
 Libraries are added when the code that uses them is added, not all at the start.
+
+## 11. Where policy pages come from (changed from the brief)
+Most Instagram / Meta help pages are rendered with JavaScript and return no text when downloaded (even from
+the Internet Archive). So for Instagram I use Meta's Transparency Center pages (Community Standards and
+Advertising Standards). They apply to Instagram and Facebook and are served as normal HTML.
+Old versions come from the Internet Archive (Wayback Machine): `data/sources.csv` says which snapshot
+months to download for each page. The FTC Endorsement Guides come from the official eCFR API, which gives the
+text at a given date (2016 version and the 2023 revision). The FTC website itself blocks scripts, so its pages
+also come from the Wayback Machine.
+Pages that come back almost empty (less than 300 characters after parsing) are skipped during ingestion.
+
+## 12. No page numbers
+All sources are HTML, XML, markdown or plain text (CUAD contracts are .txt), so `page` is always empty.
+Citations use the section path and character offsets instead, which is more precise anyway.
+
+## 13. Versions are decided by content, not by date
+The download script can fetch two snapshots of a page that have the same text. Ingestion compares the
+sha256 of the parsed text: same hash means "unchanged" and no new version is created. Each version has a
+`valid_from` (its snapshot date) and `valid_to` (the date of the next version), so a question like "what
+was the rule in 2024?" searches the version that was valid on that date.
+
+## 14. Synthetic contracts from templates
+The brief suggested LLM-generated contracts. I generate them from a template filled with the values of
+`contracts_index` (dates, fee, exclusivity) and random choices for the other clauses (seeded). This is
+reproducible and the contract text always matches the SQL data, which is needed for hybrid questions.
