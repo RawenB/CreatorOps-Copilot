@@ -21,20 +21,27 @@ ALLOWED_TABLES = {
 }  # fmt: skip
 
 TABLE_DESCRIPTIONS = {
-    "platforms": "Social platforms (Instagram, TikTok, YouTube).",
-    "creators": "Creators managed by the agency (synthetic personas). niche = content category.",
-    "accounts": "One account per creator per platform, with follower count.",
-    "brands": "Brands that sponsor campaigns. category = product category (beauty, alcohol...).",
-    "campaigns": "Brand campaigns of a creator, with start/end dates and budget in USD.",
-    "posts": "Published posts. format = reel/photo/carousel/story/video/short. "
-    "is_paid = sponsored. "
-    "has_disclosure = paid partnership label used. campaign_id is NULL for organic posts.",
-    "post_metrics_daily": "Metrics of each post for its first 7 days (one row per post per day). "
-    "Engagement rate = (likes+comments+shares+saves) / reach.",
-    "schedule": "Posts planned in the future and their status (pending/approved/rejected).",
-    "approvals": "Approval requests for write actions and their decision.",
-    "contracts_index": "One row per brand contract: dates, fee, exclusivity flag and category. "
-    "doc_id links to the contract document.",
+    "platforms": "platform_id, name in ('Instagram', 'TikTok', 'YouTube').",
+    "creators": "Creators managed by the agency (synthetic personas 'Creator A' to 'Creator H'). "
+    "niche = content category.",
+    "accounts": "One account per creator per platform. Join: accounts.creator_id = creators.creator_id, "
+    "accounts.platform_id = platforms.platform_id.",
+    "brands": "Brands that sponsor campaigns. category in ('beauty', 'fashion', 'supplements', 'food', "
+    "'tech', 'travel', 'gaming', 'alcohol').",
+    "campaigns": "Brand campaigns of a creator (start_date, end_date, budget_usd). "
+    "Join: campaigns.brand_id = brands.brand_id, campaigns.creator_id = creators.creator_id.",
+    "posts": "Published posts. Join: posts.account_id = accounts.account_id (NOT creator_id). "
+    "format in ('reel', 'photo', 'carousel', 'story', 'video', 'short') - Reels are format = 'reel'. "
+    "posted_at = 'YYYY-MM-DD HH:MM:SS'. is_paid = 1 for sponsored posts, has_disclosure = 1 if the "
+    "paid partnership label was used. campaign_id is NULL for organic posts.",
+    "post_metrics_daily": "Metrics of each post for its first 7 days, one row per post per day. "
+    "Join: post_metrics_daily.post_id = posts.post_id. To filter by month use posts.posted_at. "
+    "Engagement rate = 1.0 * SUM(likes + comments + shares + saves) / SUM(reach) "
+    "(multiply by 1.0 to avoid integer division).",
+    "schedule": "Posts planned in the future (status 'scheduled').",
+    "approvals": "Approval requests for write actions. decision is NULL while pending.",
+    "contracts_index": "One row per brand contract (contract_id like 'C003'): start_date, end_date, "
+    "fee_usd, exclusivity (1/0) and exclusivity_category. doc_id links to the contract document.",
 }
 
 # authorizer action codes that are fine for a read-only query
