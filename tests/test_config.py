@@ -1,7 +1,9 @@
 from creatorops.config import Settings
 
 
-def test_default_settings():
+def test_default_settings(monkeypatch):
+    # CI sets CREATOROPS_LLM_PROVIDER=fake, remove it to see the real default
+    monkeypatch.delenv("CREATOROPS_LLM_PROVIDER", raising=False)
     s = Settings(_env_file=None)
     assert s.llm_provider == "ollama"
     assert s.db_path.name == "creatorops.sqlite"
