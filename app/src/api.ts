@@ -48,7 +48,21 @@ export type ComparisonSource = {
   changes: Change[]
 }
 
-export type Source = DocSource | SqlSource | ComparisonSource
+export type ComplianceSource = {
+  kind: 'compliance'
+  n: number
+  verdict: 'compliant' | 'non_compliant'
+  problems: { rule: string; message: string }[]
+}
+
+export type ClassificationSource = {
+  kind: 'classification'
+  n: number
+  label: string
+  scores: Record<string, number>
+}
+
+export type Source = DocSource | SqlSource | ComparisonSource | ComplianceSource | ClassificationSource
 
 export type Approval = {
   approval_id: number
