@@ -29,7 +29,7 @@ def test_server_lists_all_tools():
     names = asyncio.run(go())
     for name in ["search_policies", "compare_policy_versions", "find_clause", "run_sql",
                  "explain_schema", "schedule_post", "list_approvals", "check_post_compliance",
-                 "classify_clause"]:  # fmt: skip
+                 "classify_clause", "create_ticket", "list_tickets"]:  # fmt: skip
         assert name in names
     # approving is only possible for a human in the UI / API, not for an MCP client
     assert not any("decide" in n or "approve" in n for n in names)

@@ -9,7 +9,7 @@ only look at approvals, not decide them.
 
 from mcp.server.mcpserver import MCPServer
 
-from creatorops.tools import classify, compliance, contracts, policies, scheduling, sql
+from creatorops.tools import classify, compliance, contracts, policies, scheduling, sql, tickets
 
 mcp = MCPServer("creatorops")
 
@@ -81,13 +81,43 @@ def classify_clause(text: str) -> dict:
 
 
 @mcp.tool()
-def schedule_post(creator: str, platform: str, post_datetime: str, caption: str) -> dict:
+def create_ticket(
+    title: str,
+    description: str | None = None,
+    priority: str = "medium",
+    reference_type: str | None = None,
+    reference_id: str | None = None,
+    link: str | None = None,
+) -> dict:
+    """Create a task ticket for the agency team. reference_type: contract, campaign, post, creator or
+    policy (e.g. contract C003, post 166). link: optional http(s) URL."""
+    return tickets.create_task(title, description, priority, None, link, reference_type, reference_id,
+                               created_by="mcp")  # fmt: skip
+
+
+@mcp.tool()
+def list_tickets(kind: str | None = None, status: str | None = None) -> list[dict]:
+    """List tickets. kind: task or post_request. status: open, in_progress, done, pending, approved, rejected."""
+    return tickets.list_tickets(kind, status)
+
+
+@mcp.tool()
+def schedule_post(
+    creator: str,
+    platform: str,
+    post_datetime: str,
+    caption: str,
+    link: str | None = None,
+    reference_type: str | None = None,
+    reference_id: str | None = None,
+) -> dict:
     """Ask to schedule a post. Nothing is scheduled until a human approves the request.
 
     creator: the creator's name, e.g. "Creator A".
     platform: Instagram, TikTok or YouTube. post_datetime: "YYYY-MM-DD HH:MM" in the future.
     """
-    result = scheduling.propose_schedule_post(creator, platform, post_datetime, caption)
+    result = scheduling.propose_schedule_post(creator, platform, post_datetime, caption, link,
+                                              reference_type, reference_id, created_by="mcp")  # fmt: skip
     if "error" not in result:
         result["note"] = "Waiting for human approval in the CreatorOps UI."
     return result

@@ -9,6 +9,7 @@ from creatorops.tools.compliance import check_post_compliance
 from creatorops.tools.contracts import CLAUSE_QUERIES, find_clause
 from creatorops.tools.policies import compare_policy_versions, search_policies
 from creatorops.tools.sql import explain_schema, run_sql
+from creatorops.tools.tickets import PRIORITIES, REFERENCE_TYPES, create_task
 
 
 def schema(name, description, properties, required):
@@ -99,6 +100,20 @@ TOOL_SCHEMAS = {
         {"text": {"type": "string", "description": "The clause text."}},
         ["text"],
     ),
+    "create_ticket": schema(
+        "create_ticket",
+        "Create a task ticket for the team (e.g. 'Add a disclosure to post 166'). Use a reference when the "
+        "task is about a contract (C003), campaign (6), post (166), creator (Creator B) or policy document.",
+        {
+            "title": {"type": "string"},
+            "description": {"type": "string"},
+            "priority": {"type": "string", "enum": PRIORITIES},
+            "reference_type": {"type": "string", "enum": REFERENCE_TYPES},
+            "reference_id": {"type": "string", "description": "e.g. C003, 166, Creator B"},
+            "link": {"type": "string", "description": "Optional http(s) URL."},
+        },  # fmt: skip
+        ["title"],
+    ),
     "schedule_post": schema(
         "schedule_post",
         "Schedule a post for a creator. This is a write action: a human must approve it "
@@ -107,6 +122,9 @@ TOOL_SCHEMAS = {
             "creator": {"type": "string", "description": "Creator name, e.g. 'Creator A'."},
             "platform": {"type": "string", "enum": ["Instagram", "TikTok", "YouTube"]},
             "post_datetime": {"type": "string", "description": "YYYY-MM-DD HH:MM"},
+            "link": {"type": "string", "description": "Optional link to the content draft."},
+            "reference_type": {"type": "string", "enum": REFERENCE_TYPES},
+            "reference_id": {"type": "string", "description": "e.g. the contract id C003"},
             "caption": {"type": "string"},
         },
         ["creator", "platform", "post_datetime", "caption"],
@@ -121,6 +139,8 @@ READ_TOOLS = {
     "explain_schema": explain_schema,
     "check_post_compliance": check_post_compliance,
     "classify_clause": classify_clause,
+    # writes only to the team's ticket list (internal, no external effect), so no approval needed
+    "create_ticket": lambda **args: create_task(**args, created_by="assistant"),
 }
 
 WRITE_TOOLS = {"schedule_post"}
@@ -158,6 +178,9 @@ def result_to_sources(name: str, result: dict, start_n: int) -> list[dict]:
             sources.append({**s, "kind": "document"})
     elif name == "classify_clause":
         sources.append({"kind": "classification", **result})
+    elif name == "create_ticket":
+        # the ticket has its own "kind" (task): keep it as ticket_kind, the source kind is "ticket"
+        sources.append({**result, "ticket_kind": result.get("kind"), "kind": "ticket"})
     for i, s in enumerate(sources):
         s["n"] = start_n + i
     return sources
@@ -207,6 +230,12 @@ def format_for_llm(name: str, result: dict, sources: list[dict]) -> str:
                 "\n".join(f"- {p['rule']}: {p['message']}" for p in s["problems"]) or "- none"
             )
             parts.append(f"[{s['n']}] Compliance check: {s['verdict']}\nproblems:\n{problems}")
+        elif s["kind"] == "ticket":
+            parts.append(
+                f"[{s['n']}] Ticket {s['code']} created: {s['title']} (priority {s['priority']}"
+                + (f", reference {s['reference_label']}" if s.get("reference_label") else "")
+                + ")"
+            )
         elif s["kind"] == "classification":
             parts.append(f"[{s['n']}] Clause classifier: {s['label']} (scores {s['scores']})")
     return "\n\n".join(parts)

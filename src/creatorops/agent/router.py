@@ -20,8 +20,8 @@ ROUTE_TOOLS = {
     "contract": ["find_clause", "run_sql", "explain_schema", "classify_clause"],
     "sql": ["run_sql", "explain_schema"],
     "hybrid": ["search_policies", "compare_policy_versions", "find_clause", "run_sql",
-               "explain_schema", "check_post_compliance", "classify_clause"],
-    "action": ["run_sql", "schedule_post", "check_post_compliance"],
+               "explain_schema", "check_post_compliance", "classify_clause", "create_ticket"],
+    "action": ["run_sql", "schedule_post", "check_post_compliance", "create_ticket"],
     "out_of_scope": [],
 }  # fmt: skip
 
@@ -31,7 +31,17 @@ ALL_TOOLS = ROUTE_TOOLS["hybrid"] + ["schedule_post"]
 def keyword_route(question: str) -> str:
     """Simple fallback router (also used by the fake LLM)."""
     q = question.lower()
-    if any(w in q for w in ["schedule", "plan a post", "book a post", "publish this"]):
+    if any(
+        w in q
+        for w in [
+            "schedule",
+            "plan a post",
+            "book a post",
+            "publish this",
+            "ticket",
+            "create a task",
+        ]
+    ):
         return "action"
     data = any(w in q for w in ["reach", "engagement", "followers", "how many", "average",
                                 "which creator", "top ", "best ", "posts", "campaign"])  # fmt: skip
