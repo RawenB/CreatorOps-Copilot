@@ -27,6 +27,9 @@ dev = [
     "pytest>=8.3",
     "httpx>=0.28.1",
 ]
+finetune = [
+    "mlflow-skinny>=3",
+]
 
 [build-system]
 requires = ["hatchling"]
