@@ -1,60 +1,50 @@
-# Decision Log
+# Decisions
 
-Every trade-off or deviation from `PROJECT_BRIEF.md` is recorded here. Format: context, decision, consequences.
-Status is one of: **accepted**, **provisional** (to be confirmed by a measurement), **superseded**.
+Choices I made during the project and why. Changes compared to the original brief are marked.
 
----
+## 1. Python 3.11 with uv
+uv installs Python 3.11 and pins all versions in `uv.lock`, so the project installs the same way on my Mac,
+my Windows PC and in GitHub Actions. Tooling is kept small: ruff for style and pytest for tests.
 
-## D-001: Python 3.11 managed by uv with a lockfile
-- **Status:** accepted (2026-11-21)
-- **Context:** The brief requires Python 3.11, pinned dependencies and reproducibility. The dev Mac ships Python 3.9.
-- **Decision:** Use `uv` to install and manage Python 3.11 (`.python-version`). `pyproject.toml` declares ranges, `uv.lock` pins exact versions. CI installs with `uv sync --frozen`.
-- **Consequences:** The environment is reproduced the same way on the Mac, the Windows PC and CI. Contributors need `uv` installed.
+## 2. Local LLM only (Ollama) (changed from the brief)
+The brief suggested a hosted API plus a local model. I don't have an API budget, so everything runs with
+Ollama. The default model is `qwen3:8b` because it supports tool calling and runs on a laptop.
+All LLM calls go through one small client class, so another provider could be added later.
+There is also a `fake` provider that returns fixed answers, used in tests and CI.
 
-## D-002: Local LLM only (Ollama), behind an `LLMClient` interface
-- **Status:** accepted (owner decision, 2026-11-21). The default model is **provisional**.
-- **Context:** The brief suggests one hosted provider (Anthropic) and one local provider (Ollama). The owner chose **Ollama only**: no API key and no budget.
-- **Decision:**
-  - Providers: `ollama` (real) and `fake` (deterministic, offline, used by tests and CI). The `LLMClient` interface stays provider-agnostic, so a hosted provider can still be added later.
-  - Default agent model: `qwen3:8b`. It supports native tool calling and runs on a laptop. Default judge model: `qwen3:14b`. Both are provisional. Phase 2 confirms or replaces them with a small benchmark on routing and tool-call accuracy, and the measured numbers will be recorded here.
-- **Consequences:**
-  - Agent quality and latency are bounded by local hardware. Latency is reported honestly in the eval.
-  - **LLM-as-judge with a local model is less reliable.** Mitigations: a fixed rubric, the judge model is larger than the agent model, and a manual spot-check on a sample measures judge–human agreement. This is listed as a limitation in the report.
-  - "Token cost" metrics are reported as token counts and wall-clock time, not dollars.
-  - The CI never calls an LLM.
+Downsides: answers are slower and weaker than with a big hosted model, and using a local model as the judge
+for generation metrics is less reliable. I will check a sample of the judge's scores by hand and mention it in
+the limitations.
 
-## D-003: Custom React web UI instead of Streamlit/Gradio
-- **Status:** accepted (owner decision, 2026-11-21)
-- **Context:** The brief defaults to Streamlit/Gradio. The owner prefers a custom React UI for a more polished demo.
-- **Decision:** React + TypeScript (Vite) in `app/`, talking to the FastAPI backend. Panels: chat, sources (highlighted passages), SQL (query + rows), approvals queue, calendar.
-- **Consequences:** This takes more time than Streamlit. Mitigations: the FastAPI contract (typed Pydantic schemas) is built and tested first in Phase 2. The UI is built in Phase 3 against that contract, limited to the five panels above, with a component library to avoid custom CSS work. Node 24 is available on the dev Mac.
+## 3. React UI (changed from the brief)
+The brief suggested Streamlit or Gradio. I chose React (Vite + TypeScript) because it gives a better demo.
+To save time, the FastAPI backend is done first and the UI only calls it.
 
-## D-004: Qdrant as vector store, embedded local mode by default
-- **Status:** accepted (2026-11-21)
-- **Context:** The store must support upserts and metadata filters (platform, version, `is_latest`, doc_type). Docker availability on the Windows PC is unconfirmed, and the Docker daemon is not always running on the Mac.
-- **Decision:** Use Qdrant through `qdrant-client`. The default `CREATOROPS_QDRANT_MODE=local` uses embedded on-disk storage and needs no server. `server` mode uses `docker compose up qdrant`.
-- **Consequences:** It works with or without Docker using the same code. Local mode is single-process, which is fine for a single-user demo.
+## 4. Qdrant as vector store
+Qdrant supports metadata filters (platform, version, is_latest...) and upserts, which I need for versioned
+documents. It can run in local mode (just a folder, no server), which is the default. Docker is available,
+so `make qdrant` can also start a real server.
 
-## D-005: MLflow (local file store) for experiment tracking
-- **Status:** accepted (2026-11-21)
-- **Decision:** MLflow with a local `mlruns/` store (git-ignored). It needs no account and works offline. Colab/Kaggle fine-tuning runs export their MLflow run directory, which is then imported locally.
-- **Consequences:** Summaries of runs go in `reports/`. Raw run stores are not committed.
+## 5. MLflow for experiments
+MLflow with a local folder (`mlruns/`, not committed). No account needed.
 
-## D-006: Instagram is the priority platform
-- **Status:** accepted (owner decision, 2026-11-21)
-- **Decision:** Instagram/Meta policy pages get the most coverage and the most version snapshots, and they are used for the demo scenarios. TikTok and YouTube are covered with fewer pages.
-- **Consequences:** The eval set's policy questions are weighted toward Instagram. This is stated in the eval protocol.
+## 6. Instagram first
+Instagram gets the most policy pages and snapshots and is used in the demo. TikTok and YouTube have fewer pages.
 
-## D-007: English for code, docs, report and presentation
-- **Status:** accepted (owner decision, 2026-11-21)
+## 7. English
+Code, docs, report and presentation are in English.
 
-## D-008: Add dependencies in the phase that first uses them
-- **Status:** accepted (2026-11-21)
-- **Context:** The full stack (LangGraph, Qdrant, sentence-transformers, FastAPI, MCP…) is heavy.
-- **Decision:** Phase 0 installs only config and dev tooling. Each feature branch adds the dependencies it needs, in the same commit as the code that uses them.
-- **Consequences:** Installs and CI stay fast early on. The git history shows clearly why each dependency exists.
+## 8. One-week deadline (changed from the brief)
+The brief planned 4 weeks; I have 1 week. What I keep: everything required by the course (RAG with metadata
+and versions, citations, MCP with tools, LangGraph, 120+ eval questions with Recall@k/MRR, one fine-tuning
+experiment, web UI). What I reduce:
+- corpus around 120 documents (lower end of the 120-250 target)
+- fine-tuning: one small encoder model only
+- ablations kept cheap (they reuse the same index and eval set)
+- stretch goals (multilingual, weekly report, feedback button) are dropped
 
-## D-009: Default embedding model `bge-base-en-v1.5`, `bge-m3` in the ablation
-- **Status:** provisional (2026-11-21)
-- **Context:** The corpus is English. `bge-base` is about 110M parameters and fast on CPU. `bge-m3` is about 570M parameters, multilingual and slower.
-- **Decision:** Start with `bge-base-en-v1.5`. Compare it with `bge-m3` in the retrieval ablation and keep the better one, based on measured Recall@k/MRR versus indexing time.
+## 9. Embedding model
+Start with `bge-base-en-v1.5` (small, fast on CPU). Compare with `bge-m3` in one ablation if time allows.
+
+## 10. Dependencies
+Libraries are added when the code that uses them is added, not all at the start.
