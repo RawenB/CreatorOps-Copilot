@@ -17,7 +17,8 @@ Examples:
 "What changed in TikTok's branded content policy?" -> {"route": "policy"}
 "Is contract C004 exclusive and for how long?" -> {"route": "contract"}
 "Which creator had the highest engagement rate on Reels in August 2026?" -> {"route": "sql"}
-"Creator B works with an alcohol brand: what does her contract say and what do Meta ad rules require?" -> {"route": "hybrid"}
+"Creator B works with an alcohol brand: what does their contract say and what do Meta ad rules require?" -> {"route": "hybrid"}
+"Creator D's reach dropped in June: what does our reporting SOP say about it?" -> {"route": "hybrid"}
 "Schedule this caption for Creator A on Instagram on Friday at 18:00" -> {"route": "action"}
 "What's the capital of Australia?" -> {"route": "out_of_scope"}
 """
@@ -47,7 +48,14 @@ Question type: {route}.
 {schema}"""
 
 SCHEMA_HINT = """Database tables (SQLite):
-{tables}"""
+{tables}
+
+Lookup values (ids are INTEGERS, never compare an id column with a name):
+{lookups}
+To filter by creator or platform name, join the table and filter on the name, e.g.
+posts p JOIN accounts a ON a.account_id = p.account_id JOIN creators c ON c.creator_id = a.creator_id
+JOIN platforms pl ON pl.platform_id = a.platform_id WHERE c.name = 'Creator C' AND pl.name = 'Instagram'.
+posts has no creator_id or platform_id column: always go through accounts."""
 
 OUT_OF_SCOPE_ANSWER = (
     "I can only help with the agency's work: platform policies and advertising rules, creator contracts, "
