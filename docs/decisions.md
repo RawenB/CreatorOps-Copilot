@@ -73,3 +73,13 @@ was the rule in 2024?" searches the version that was valid on that date.
 The brief suggested LLM-generated contracts. I generate them from a template filled with the values of
 `contracts_index` (dates, fee, exclusivity) and random choices for the other clauses (seeded). This is
 reproducible and the contract text always matches the SQL data, which is needed for hybrid questions.
+
+## 15. Hybrid search with Reciprocal Rank Fusion
+Dense search is good with paraphrases, BM25 is good with exact words (clause names, "#ad", section numbers).
+I take the top 30 of each and merge them with Reciprocal Rank Fusion (k = 60). RRF only uses ranks, so I don't
+have to normalize two very different score scales. The BM25 index is rebuilt in memory from the chunk registry
+at startup (about 7,500 chunks, a few seconds) instead of being saved to disk.
+
+## 16. Reranker
+`bge-reranker-v2-m3` reranks the 30 fused candidates. It took about 1.8 s per query on my Mac in a first manual
+test, which is fine for the assistant. The ablation will measure if it is worth the extra time.
