@@ -14,7 +14,6 @@ build/
 # Secrets / local config
 .env
 *.local.*
-.claude/settings.local.json
 
 # Data (raw corpus and generated artifacts are reproducible via scripts)
 data/raw/
