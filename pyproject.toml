@@ -15,6 +15,7 @@ dependencies = [
     "sentence-transformers>=6.3.0",
     "qdrant-client>=1.20.0",
     "rank-bm25>=0.2.2",
+    "langgraph>=1.2.24",
 ]
 
 [dependency-groups]
@@ -36,10 +37,8 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]
-
-[tool.ruff.lint.per-file-ignores]
-# the contract template is long prose
-"src/creatorops/synthetic_contracts.py" = ["E501"]
+# ruff format already handles code width, long lines left are prompt / SQL text
+ignore = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

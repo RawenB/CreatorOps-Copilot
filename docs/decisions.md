@@ -95,3 +95,34 @@ file is also opened read-only, there is a time limit (progress handler) and a ro
 `search_policies`, `find_clause` and `compare_policy_versions` return passages with all citation fields
 (source id, title, section, snapshot date, version, URL). The agent writes the answer and must cite these
 source ids. `compare_policy_versions` does a section-by-section diff without an LLM; the agent summarizes it.
+
+## 19. Own small Ollama client instead of LangChain's chat model
+LangGraph is used for the agent (state, routing, tool loop, interrupt for approvals, checkpointer).
+For the LLM itself I call Ollama's `/api/chat` with httpx in ~40 lines (`llm/client.py`). It supports tool
+calling and JSON mode, lets me turn off qwen3's "thinking" and returns token counts for the cost metrics.
+A `FakeLLM` with the same `chat()` method makes the graph testable in CI without a model.
+
+## 20. Router + tool subsets
+A first LLM call classifies the question (policy / contract / sql / hybrid / action / out_of_scope) in JSON
+mode, with a keyword router as fallback. Each route only gets the tools it needs (a small model makes fewer
+wrong tool calls with fewer tools), and out-of-scope questions are refused without calling any tool. The
+`use_router=False` option gives every tool to every question, for the "without routing" ablation.
+
+## 21. Approval with a LangGraph interrupt + the approvals table
+`schedule_post` never writes directly. The agent's call creates a pending row in `approvals`, then the
+graph stops (`interrupt`). The run is resumed with the human decision; only an approval adds the row to
+`schedule`. Rows are also visible in the approvals table, so the UI and the MCP client can show the queue.
+
+## 22. Citation rules
+Every tool result gets a number. After the answer, `citations.verify` removes numbers that don't exist,
+does not accept citations of an empty SQL result, and marks the answer as:
+- abstained: the model says it does not know, or there is no usable source for a question that needs one
+  (the answer is then replaced by a standard "not enough information" message)
+- unverified: sources exist but the answer cites none of them (shown with a warning)
+
+## 23. Prompt fixes found while testing (before building the eval set)
+First manual runs showed the model joining `posts` directly to `creators`, using `format = 'Reels'` and
+integer division (engagement rate 0.0), and once inventing "12.5%" from an empty result. Fixes: the schema hint
+now includes join keys, allowed values and the engagement-rate formula, one example engagement-rate query is
+in the prompt, and empty SQL results are shown as "0 rows". Because the example query is close to some
+analytics questions, the eval set must not reuse it word for word (noted in the eval protocol).
