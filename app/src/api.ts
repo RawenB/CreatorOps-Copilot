@@ -62,7 +62,89 @@ export type ClassificationSource = {
   scores: Record<string, number>
 }
 
-export type Source = DocSource | SqlSource | ComparisonSource | ComplianceSource | ClassificationSource
+export type Ticket = {
+  ticket_id: number
+  code: string
+  kind: 'task' | 'post_request'
+  title: string
+  description: string | null
+  status: string
+  priority: 'low' | 'medium' | 'high'
+  assignee: string | null
+  link: string | null
+  reference_type: string | null
+  reference_id: string | null
+  reference_label: string | null
+  reference_doc_id?: string | null
+  approval_id: number | null
+  decided_by?: string | null
+  created_by: string
+  created_at: string
+  updated_at: string
+}
+
+export type TicketSource = Ticket & { kind: 'task'; n: number } // a ticket the assistant created
+
+export type Source =
+  | DocSource
+  | SqlSource
+  | ComparisonSource
+  | ComplianceSource
+  | ClassificationSource
+  | (Omit<TicketSource, 'kind'> & { kind: 'ticket' })
+
+export type NewTicket = {
+  kind: 'task' | 'post_request'
+  title?: string
+  description?: string
+  priority?: string
+  assignee?: string
+  link?: string
+  reference_type?: string
+  reference_id?: string
+  creator?: string
+  platform?: string
+  post_datetime?: string
+  caption?: string
+}
+
+export type Anomaly = {
+  kind: string
+  severity: 'high' | 'medium' | 'info'
+  creator: string
+  date: string
+  text: string
+  ticket: { title: string; priority: string; reference_type: string; reference_id: string; description: string }
+}
+
+export type AnalyticsData = {
+  platform: string | null
+  source: { type: string; generator: string; seed: number; note: string }
+  kpis: {
+    creators: number
+    posts: number
+    reach: number
+    impressions: number
+    engagement_rate: number
+    first_post: string
+    last_post: string
+    paid_posts: number
+    undisclosed_paid: number
+  }
+  monthly: { month: string; posts: number; reach: number; engagement_rate: number }[]
+  creators: {
+    creator_id: number
+    name: string
+    niche: string
+    country: string
+    posts: number
+    reach: number
+    engagement_rate: number
+    followers: Record<string, number>
+  }[]
+  formats: { format: string; posts: number; avg_reach: number; engagement_rate: number }[]
+  anomalies: Anomaly[]
+}
 
 export type Approval = {
   approval_id: number
@@ -76,6 +158,10 @@ export type Approval = {
   platform?: string
   post_datetime?: string
   caption?: string
+  link?: string | null
+  reference?: string | null
+  ticket?: string
+  ticket_id?: number
 }
 
 export type ChatResult = {
@@ -124,9 +210,9 @@ export type DocumentText = {
   text: string
 }
 
-async function request<T>(path: string, body?: unknown): Promise<T> {
+async function request<T>(path: string, body?: unknown, method?: string): Promise<T> {
   const response = await fetch('/api' + path, {
-    method: body === undefined ? 'GET' : 'POST',
+    method: method ?? (body === undefined ? 'GET' : 'POST'),
     headers: { 'Content-Type': 'application/json' },
     body: body === undefined ? undefined : JSON.stringify(body),
   })
@@ -153,6 +239,18 @@ export const api = {
     request<{ tables: Record<string, { description: string; columns: Record<string, string> }> }>(
       '/schema',
     ),
+  tickets: (kind = '', status = '') => {
+    const params = new URLSearchParams()
+    if (kind) params.set('kind', kind)
+    if (status) params.set('status', status)
+    return request<Ticket[]>('/tickets?' + params)
+  },
+  ticket: (id: number) => request<Ticket>(`/tickets/${id}`),
+  createTicket: (ticket: NewTicket) => request<Ticket>('/tickets', ticket),
+  updateTicket: (id: number, change: { status?: string; priority?: string; assignee?: string }) =>
+    request<Ticket>(`/tickets/${id}`, change, 'PATCH'),
+  analytics: (platform = '') => request<AnalyticsData>('/analytics' + (platform ? `?platform=${platform}` : '')),
+  creators: () => request<[number, string, string, string][]>('/creators'),
   document: (docId: string, version?: number | null) =>
     request<DocumentText>(`/documents/${docId}` + (version ? `?version=${version}` : '')),
 }

@@ -1,3 +1,5 @@
+import type { DocSource } from './api'
+
 // Small display helpers.
 
 export function formatDateTime(value?: string | null): string {
@@ -38,4 +40,24 @@ export function plainText(text: string): string {
 export function lastSection(path: string | null): string {
   if (!path) return ''
   return plainText(path.split(' > ').pop() || '')
+}
+
+// A minimal "source" so a referenced contract / policy can be opened in the document viewer.
+export function docRef(docId: string, title: string): DocSource {
+  return {
+    kind: 'document', n: 0, doc_id: docId, title, doc_type: '', platform: null, section: null,
+    snapshot_date: null, version: null, is_latest: true, source_url: null, synthetic: false,
+    clause_type: null, char_start: null, char_end: null, score: 0, text: '',
+  }
+}
+
+export function ticketLink(id: number): string {
+  return `${window.location.origin}/#/tickets/${id}`
+}
+
+// 1,234 / 12K / 3.4M
+export function compact(n: number): string {
+  if (Math.abs(n) >= 1_000_000) return (n / 1_000_000).toFixed(1).replace('.0', '') + 'M'
+  if (Math.abs(n) >= 10_000) return Math.round(n / 1000) + 'K'
+  return n.toLocaleString('en-US')
 }
