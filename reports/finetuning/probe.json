@@ -1,0 +1,331 @@
+{
+  "full_test": {
+    "n": 1382,
+    "note": "all test examples",
+    "macro_f1": 0.7347,
+    "accuracy": 0.7981,
+    "per_class": {
+      "exclusivity": {
+        "precision": 0.609,
+        "recall": 0.452,
+        "f1": 0.519,
+        "support": 62
+      },
+      "non_compete": {
+        "precision": 0.553,
+        "recall": 0.5,
+        "f1": 0.525,
+        "support": 42
+      },
+      "term_renewal": {
+        "precision": 0.892,
+        "recall": 0.838,
+        "f1": 0.865,
+        "support": 99
+      },
+      "termination": {
+        "precision": 0.655,
+        "recall": 0.613,
+        "f1": 0.633,
+        "support": 93
+      },
+      "ip_license": {
+        "precision": 0.753,
+        "recall": 0.773,
+        "f1": 0.763,
+        "support": 154
+      },
+      "payment": {
+        "precision": 0.705,
+        "recall": 0.661,
+        "f1": 0.682,
+        "support": 112
+      },
+      "governing_law": {
+        "precision": 0.942,
+        "recall": 0.942,
+        "f1": 0.942,
+        "support": 69
+      },
+      "liability": {
+        "precision": 0.796,
+        "recall": 0.857,
+        "f1": 0.826,
+        "support": 105
+      },
+      "other": {
+        "precision": 0.841,
+        "recall": 0.876,
+        "f1": 0.858,
+        "support": 646
+      }
+    },
+    "confusion_matrix": [
+      [
+        28,
+        8,
+        0,
+        0,
+        15,
+        2,
+        0,
+        0,
+        9
+      ],
+      [
+        1,
+        21,
+        0,
+        2,
+        3,
+        0,
+        0,
+        0,
+        15
+      ],
+      [
+        0,
+        0,
+        83,
+        7,
+        0,
+        2,
+        0,
+        1,
+        6
+      ],
+      [
+        2,
+        1,
+        1,
+        57,
+        2,
+        4,
+        0,
+        3,
+        23
+      ],
+      [
+        10,
+        2,
+        0,
+        4,
+        119,
+        1,
+        0,
+        1,
+        17
+      ],
+      [
+        0,
+        1,
+        1,
+        6,
+        2,
+        74,
+        0,
+        2,
+        26
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        65,
+        0,
+        4
+      ],
+      [
+        1,
+        0,
+        0,
+        0,
+        0,
+        5,
+        2,
+        90,
+        7
+      ],
+      [
+        4,
+        5,
+        8,
+        11,
+        17,
+        17,
+        2,
+        16,
+        566
+      ]
+    ],
+    "ms_per_example": 18.3
+  },
+  "sample": {
+    "n": 400,
+    "note": "same 400 examples as the LLM",
+    "macro_f1": 0.7167,
+    "accuracy": 0.7725,
+    "per_class": {
+      "exclusivity": {
+        "precision": 0.833,
+        "recall": 0.455,
+        "f1": 0.588,
+        "support": 22
+      },
+      "non_compete": {
+        "precision": 0.5,
+        "recall": 0.444,
+        "f1": 0.471,
+        "support": 18
+      },
+      "term_renewal": {
+        "precision": 0.88,
+        "recall": 0.759,
+        "f1": 0.815,
+        "support": 29
+      },
+      "termination": {
+        "precision": 0.643,
+        "recall": 0.857,
+        "f1": 0.735,
+        "support": 21
+      },
+      "ip_license": {
+        "precision": 0.714,
+        "recall": 0.769,
+        "f1": 0.741,
+        "support": 39
+      },
+      "payment": {
+        "precision": 0.606,
+        "recall": 0.571,
+        "f1": 0.588,
+        "support": 35
+      },
+      "governing_law": {
+        "precision": 0.947,
+        "recall": 0.9,
+        "f1": 0.923,
+        "support": 20
+      },
+      "liability": {
+        "precision": 0.692,
+        "recall": 0.818,
+        "f1": 0.75,
+        "support": 22
+      },
+      "other": {
+        "precision": 0.829,
+        "recall": 0.851,
+        "f1": 0.84,
+        "support": 194
+      }
+    },
+    "confusion_matrix": [
+      [
+        10,
+        2,
+        0,
+        0,
+        6,
+        1,
+        0,
+        0,
+        3
+      ],
+      [
+        0,
+        8,
+        0,
+        1,
+        1,
+        0,
+        0,
+        0,
+        8
+      ],
+      [
+        0,
+        0,
+        22,
+        3,
+        0,
+        1,
+        0,
+        1,
+        2
+      ],
+      [
+        0,
+        0,
+        0,
+        18,
+        0,
+        1,
+        0,
+        0,
+        2
+      ],
+      [
+        1,
+        1,
+        0,
+        0,
+        30,
+        0,
+        0,
+        0,
+        7
+      ],
+      [
+        0,
+        1,
+        0,
+        3,
+        1,
+        20,
+        0,
+        1,
+        9
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        18,
+        0,
+        2
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        2,
+        1,
+        18,
+        1
+      ],
+      [
+        1,
+        4,
+        3,
+        3,
+        4,
+        8,
+        0,
+        6,
+        165
+      ]
+    ],
+    "ms_per_example": 18.3
+  },
+  "device": "mps"
+}
