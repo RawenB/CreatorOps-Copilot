@@ -40,7 +40,8 @@ def verify(answer: str, sources: list[dict], route: str) -> dict:
     """Returns {"answer", "citations", "invalid_citations", "abstained", "unverified"}.
 
     - citations that point to no source are removed (and reported)
-    - abstained: the answer says it does not know, or an evidence route found no usable source
+    - abstained: the answer says it does not know (and cites nothing), or an evidence
+      route found no usable source
     - unverified: sources were found but the answer cites none of them (shown with a warning)
     """
     # an empty SQL result cannot support any claim, so citing it does not count
@@ -49,7 +50,11 @@ def verify(answer: str, sources: list[dict], route: str) -> dict:
     valid = [n for n in numbers if n in known]
     invalid = [n for n in numbers if n not in known]
     clean = remove_invalid_citations(answer, known) if invalid else answer
-    abstained = looks_like_abstention(answer) or (route in NEEDS_EVIDENCE and not known)
+    # "I don't know" only counts as abstaining if nothing is cited: an answer can be partly
+    # answered with sources and still say that one detail is not in the documents
+    abstained = (looks_like_abstention(answer) and not valid) or (
+        route in NEEDS_EVIDENCE and not known
+    )
     unverified = route in NEEDS_EVIDENCE and not abstained and not valid
     return {
         "answer": clean,

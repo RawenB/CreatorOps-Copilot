@@ -93,3 +93,8 @@ def test_citing_an_empty_sql_result_is_not_valid():
     assert check["citations"] == []
     assert check["invalid_citations"] == [1]
     assert check["abstained"] is True
+
+
+def test_partial_answer_with_citation_is_not_an_abstention():
+    answer = "C007 is non-exclusive [1]. The renewal is not mentioned in the clauses."
+    assert verify(answer, [{"n": 1}], "contract")["abstained"] is False

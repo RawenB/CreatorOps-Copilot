@@ -23,7 +23,10 @@ corpus: db
 ingest:
 	uv run python scripts/ingest.py
 
+api:
+	uv run uvicorn creatorops.api.main:app --reload --port 8000
+
 qdrant:
 	docker compose up -d qdrant
 
-.PHONY: install lint format test check db corpus ingest qdrant
+.PHONY: install lint format test check db corpus ingest api qdrant

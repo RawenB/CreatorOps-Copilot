@@ -43,3 +43,15 @@
 
 `chunk_id, doc_id, doc_type, platform, title, section_path, page, char_start, char_end, doc_date,
 snapshot_date, version, is_latest, source_url, synthetic, content_hash, ingested_at, clause_type`
+
+## API (FastAPI, `make api`)
+
+| Endpoint | What it does |
+|---|---|
+| `POST /chat` | ask the agent `{question, thread_id?}` -> answer, route, sources, citations, tool calls, usage, latency, or `waiting_approval` with the proposal |
+| `GET /approvals?status=pending` | approval queue |
+| `POST /approvals/{id}/decision` | approve / reject `{approved, decided_by}`; resumes the waiting chat if there is one |
+| `GET /schedule` | scheduled posts (calendar) |
+| `POST /sql`, `GET /schema` | read-only SQL panel |
+| `POST /search` | hybrid search with filters |
+| `GET /documents/{doc_id}?version=` | full text of a document version + list of versions, to highlight a cited passage with `char_start` / `char_end` |
