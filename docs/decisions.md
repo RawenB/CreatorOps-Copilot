@@ -132,3 +132,11 @@ The MCP server is a thin layer (MCPServer from the official `mcp` SDK, stdio) ov
 `creatorops.tools`, so the agent, the API and MCP clients always behave the same. `schedule_post` only creates
 a pending approval and no MCP tool can approve it: the human-in-the-loop rule also holds when another LLM
 (Claude Desktop, Cursor...) is the caller. Tools return plain dicts; the SDK sends them as JSON text.
+
+## 25. Simple React UI with a dev proxy
+The UI is plain React state (no router, no state library, no component library), 4 tabs and one CSS file:
+it is a demo / evaluation tool, not a product. Vite proxies `/api` to FastAPI so the browser never does
+cross-origin calls in dev (CORS is still configured for direct calls). Each chat question starts a new
+agent thread: questions are independent, and it keeps the evaluation and the UI behaving the same.
+Citations link to the exact passage in the stored version of the document (not the live page), so what
+the user checks is what the model read.
