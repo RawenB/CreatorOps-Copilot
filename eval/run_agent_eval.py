@@ -11,6 +11,7 @@ Run:  uv run python eval/run_agent_eval.py                  (all questions, ~40 
       uv run python eval/run_agent_eval.py --limit 10 --types sql,policy
       uv run python eval/run_agent_eval.py --no-router --name agent_no_router
 Results are written line by line, so --resume continues a run that stopped.
+--score-only recomputes the summary of an existing run (e.g. after fixing a gold label).
 """
 
 import argparse
@@ -193,19 +194,24 @@ def main():
     parser.add_argument("--limit", type=int)
     parser.add_argument("--no-router", action="store_true")
     parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--score-only", action="store_true")
+    parser.add_argument("--dataset", default="eval/datasets/questions_v1.jsonl")
     args = parser.parse_args()
 
-    items = load_questions(types=args.types.split(",") if args.types else None, limit=args.limit)
+    types = args.types.split(",") if args.types else None
+    items = load_questions(args.dataset, types=types, limit=args.limit)
     out = RUNS / f"{args.name}.jsonl"
     RUNS.mkdir(parents=True, exist_ok=True)
     done = set()
-    if args.resume and out.exists():
+    if args.score_only:
+        done = {i["id"] for i in items}
+    elif args.resume and out.exists():
         done = {json.loads(line)["id"] for line in out.read_text().splitlines()}
     elif out.exists():
         out.unlink()
 
     settings.db_path = EVAL_DB  # every tool now reads/writes the copy
-    copilot = Copilot(use_router=not args.no_router)
+    copilot = None if args.score_only else Copilot(use_router=not args.no_router)
     for i, item in enumerate(items, 1):
         if item["id"] in done:
             continue
