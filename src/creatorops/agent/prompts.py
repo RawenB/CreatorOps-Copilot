@@ -41,7 +41,8 @@ Rules:
    FROM post_metrics_daily m JOIN posts p ON p.post_id = m.post_id
    JOIN accounts a ON a.account_id = p.account_id JOIN creators c ON c.creator_id = a.creator_id
    WHERE p.format = 'reel' AND p.posted_at LIKE '2026-07%' GROUP BY c.name ORDER BY engagement_rate DESC
-6. To schedule a post, call schedule_post. It will NOT be scheduled until a human approves it, so never
+6. To check if a caption can be posted, call check_post_compliance and cite its result.
+7. To schedule a post, call schedule_post. It will NOT be scheduled until a human approves it, so never
    say it is scheduled unless the tool result says the approval was granted.
 
 Question type: {route}.

@@ -21,6 +21,8 @@ export default function SourceCard({
           </span>
         )}
         {source.kind === 'sql' && <b>SQL result</b>}
+        {source.kind === 'compliance' && <b>Compliance check</b>}
+        {source.kind === 'classification' && <b>Clause classifier</b>}
         {source.kind === 'comparison' && (
           <b>
             {source.title}: v{source.old_version.version} ({source.old_version.snapshot_date}) → v
@@ -47,6 +49,30 @@ export default function SourceCard({
           <SqlTable columns={source.columns} rows={source.rows.slice(0, 20)} />
           {(source.truncated || source.rows.length > 20) && <div className="meta">more rows not shown</div>}
         </>
+      )}
+
+      {source.kind === 'compliance' && (
+        <div>
+          <span className={'badge ' + (source.verdict === 'compliant' ? 'approved' : 'rejected')}>
+            {source.verdict.replace('_', ' ')}
+          </span>
+          <ul>
+            {source.problems.map((p) => (
+              <li key={p.rule}>{p.message}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {source.kind === 'classification' && (
+        <div>
+          <b>{source.label}</b>
+          <div className="meta">
+            {Object.entries(source.scores)
+              .map(([label, p]) => `${label} ${(100 * p).toFixed(0)}%`)
+              .join(' · ')}
+          </div>
+        </div>
       )}
 
       {source.kind === 'comparison' && (

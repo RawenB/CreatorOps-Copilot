@@ -16,12 +16,12 @@ from creatorops.agent.prompts import ROUTER_PROMPT
 ROUTES = ["policy", "contract", "sql", "hybrid", "action", "out_of_scope"]
 
 ROUTE_TOOLS = {
-    "policy": ["search_policies", "compare_policy_versions"],
-    "contract": ["find_clause", "run_sql", "explain_schema"],
+    "policy": ["search_policies", "compare_policy_versions", "check_post_compliance"],
+    "contract": ["find_clause", "run_sql", "explain_schema", "classify_clause"],
     "sql": ["run_sql", "explain_schema"],
     "hybrid": ["search_policies", "compare_policy_versions", "find_clause", "run_sql",
-               "explain_schema"],
-    "action": ["run_sql", "schedule_post"],
+               "explain_schema", "check_post_compliance", "classify_clause"],
+    "action": ["run_sql", "schedule_post", "check_post_compliance"],
     "out_of_scope": [],
 }  # fmt: skip
 

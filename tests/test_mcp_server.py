@@ -28,7 +28,8 @@ def test_server_lists_all_tools():
 
     names = asyncio.run(go())
     for name in ["search_policies", "compare_policy_versions", "find_clause", "run_sql",
-                 "explain_schema", "schedule_post", "list_approvals"]:  # fmt: skip
+                 "explain_schema", "schedule_post", "list_approvals", "check_post_compliance",
+                 "classify_clause"]:  # fmt: skip
         assert name in names
     # approving is only possible for a human in the UI / API, not for an MCP client
     assert not any("decide" in n or "approve" in n for n in names)
@@ -45,7 +46,7 @@ def test_run_sql_is_read_only():
 
 
 def test_schedule_post_only_creates_an_approval():
-    result = call("schedule_post", {"creator_id": 1, "platform": "Instagram",
+    result = call("schedule_post", {"creator": "Creator A", "platform": "Instagram",
                                     "post_datetime": "2030-01-10 18:00", "caption": "Hi #ad"})  # fmt: skip
     assert result["status"] == "pending_approval"
     pending = call("list_approvals")
