@@ -25,10 +25,26 @@ def now() -> str:
     return datetime.now().isoformat(sep=" ", timespec="seconds")
 
 
+def find_creator(conn, creator) -> tuple | None:
+    """Accept a creator name ("Creator A", any case) or a creator_id. Returns (id, name)."""
+    if isinstance(creator, int) or str(creator).strip().isdigit():
+        query, value = "SELECT creator_id, name FROM creators WHERE creator_id = ?", int(creator)
+    else:
+        query, value = (
+            "SELECT creator_id, name FROM creators WHERE lower(name) = ?",
+            str(creator).strip().lower(),
+        )
+    return conn.execute(query, (value,)).fetchone()
+
+
 def propose_schedule_post(
-    creator_id: int, platform: str, post_datetime: str, caption: str, db_path=None
+    creator, platform: str, post_datetime: str, caption: str, db_path=None
 ) -> dict:
-    """Validate a scheduling request and store it as a pending approval."""
+    """Validate a scheduling request and store it as a pending approval.
+
+    creator: the creator's name ("Creator A") or creator_id. The name is resolved here, in code,
+    so the LLM never has to guess an id (an unknown name is an error, not a random creator).
+    """
     platform = (
         platform.strip().capitalize().replace("Tiktok", "TikTok").replace("Youtube", "YouTube")
     )
@@ -44,16 +60,14 @@ def propose_schedule_post(
         return {"error": "The caption is empty."}
 
     conn = connect(db_path)
-    creator = conn.execute(
-        "SELECT name FROM creators WHERE creator_id = ?", (int(creator_id),)
-    ).fetchone()
-    if creator is None:
+    found = find_creator(conn, creator)
+    if found is None:
         conn.close()
-        return {"error": f"No creator with creator_id {creator_id}."}
+        return {"error": f"Unknown creator {creator!r}. Use a name from the creators table."}
 
     details = {
-        "creator_id": int(creator_id),
-        "creator_name": creator[0],
+        "creator_id": found[0],
+        "creator_name": found[1],
         "platform": platform,
         "post_datetime": when.isoformat(sep=" ", timespec="minutes"),
         "caption": caption.strip(),

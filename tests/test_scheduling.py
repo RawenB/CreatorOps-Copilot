@@ -50,7 +50,8 @@ def test_cannot_decide_twice(db):
 @pytest.mark.parametrize(
     "args",
     [
-        (99, "Instagram", "2030-01-04 18:00", "x"),  # unknown creator
+        (99, "Instagram", "2030-01-04 18:00", "x"),  # unknown creator id
+        ("Creator Z", "Instagram", "2030-01-04 18:00", "x"),  # unknown creator name
         (1, "Snapchat", "2030-01-04 18:00", "x"),  # unknown platform
         (1, "Instagram", "2020-01-04 18:00", "x"),  # past date
         (1, "Instagram", "next friday", "x"),  # bad date
@@ -59,3 +60,9 @@ def test_cannot_decide_twice(db):
 )
 def test_invalid_requests_are_refused(db, args):
     assert "error" in propose_schedule_post(*args, db_path=db)
+
+
+def test_creator_can_be_given_by_name(db):
+    result = propose_schedule_post("creator c", "Instagram", "2030-01-04 18:00", "Hi", db_path=db)
+    assert result["creator_id"] == 3
+    assert result["creator_name"] == "Creator C"

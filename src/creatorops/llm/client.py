@@ -101,7 +101,7 @@ def fake_tool_call(question: str, names: list[str]):
     q = question.lower()
     if "schedule_post" in names and "schedule" in q:
         return {"name": "schedule_post", "arguments": {
-            "creator_id": 1, "platform": "Instagram", "post_datetime": "2030-01-04 18:00",
+            "creator": "Creator A", "platform": "Instagram", "post_datetime": "2030-01-04 18:00",
             "caption": "New look of the week #ad"}}  # fmt: skip
     if "find_clause" in names and ("contract" in q or "clause" in q):
         return {
