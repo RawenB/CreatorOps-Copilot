@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     embedding_model: str = "BAAI/bge-base-en-v1.5"
     reranker_model: str = "BAAI/bge-reranker-v2-m3"
     top_k: int = 10
+    use_reranker: bool = True
 
     # llm: "ollama" or "fake" (fake is used in tests and CI)
     llm_provider: str = "ollama"

@@ -83,3 +83,15 @@ at startup (about 7,500 chunks, a few seconds) instead of being saved to disk.
 ## 16. Reranker
 `bge-reranker-v2-m3` reranks the 30 fused candidates. It took about 1.8 s per query on my Mac in a first manual
 test, which is fine for the assistant. The ablation will measure if it is worth the extra time.
+
+## 17. SQL safety with the SQLite authorizer
+Instead of parsing SQL with regexes, the SQL tool uses SQLite's own authorizer callback: SQLite asks it
+before every action, and only SELECT, reading allowlisted tables and calling functions are allowed. The
+file is also opened read-only, there is a time limit (progress handler) and a row limit. A small text check
+(one statement, starts with SELECT/WITH) gives clearer error messages. Tested with 11 unsafe queries
+(DELETE, DROP, multiple statements, PRAGMA, ATTACH, a hidden table, sqlite_master...).
+
+## 18. Tools return sources, not answers
+`search_policies`, `find_clause` and `compare_policy_versions` return passages with all citation fields
+(source id, title, section, snapshot date, version, URL). The agent writes the answer and must cite these
+source ids. `compare_policy_versions` does a section-by-section diff without an LLM; the agent summarizes it.

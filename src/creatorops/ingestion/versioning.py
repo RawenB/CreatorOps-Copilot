@@ -116,3 +116,11 @@ class Registry:
             "WHERE doc_id = ? ORDER BY version",
             (doc_id,),
         ).fetchall()
+
+    def first_chunk(self, doc_id: str, version: int) -> dict | None:
+        """One chunk of a document version (useful to get its metadata)."""
+        row = self.conn.execute(
+            "SELECT text, metadata FROM chunks WHERE doc_id = ? AND version = ? LIMIT 1",
+            (doc_id, version),
+        ).fetchone()
+        return {**json.loads(row[1]), "text": row[0]} if row else None

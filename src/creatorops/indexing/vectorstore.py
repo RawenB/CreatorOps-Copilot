@@ -93,7 +93,8 @@ def build_filter(platform, doc_type, doc_id, as_of, latest_only):
             models.FieldCondition(key="platform", match=models.MatchAny(any=[platform, "all"]))
         )
     if doc_type:
-        must.append(models.FieldCondition(key="doc_type", match=models.MatchValue(value=doc_type)))
+        types = [doc_type] if isinstance(doc_type, str) else list(doc_type)
+        must.append(models.FieldCondition(key="doc_type", match=models.MatchAny(any=types)))
     if doc_id:
         must.append(models.FieldCondition(key="doc_id", match=models.MatchValue(value=doc_id)))
 
