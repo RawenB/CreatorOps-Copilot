@@ -101,22 +101,26 @@ def download_policies(client):
                 snapshots = wayback_snapshots(client, src["url"])
                 chosen = {pick_snapshot(snapshots, w) for w in src["snapshots"].split(";")}
                 for stamp, original in sorted(chosen):
-                    r = client.get(f"http://web.archive.org/web/{stamp}id_/{original}")
-                    r.raise_for_status()
                     path = out_dir / f"{stamp_to_date(stamp)}.html"
-                    path.write_text(r.text, encoding="utf-8")
+                    if not path.exists():  # archived snapshots never change, download once
+                        r = client.get(f"http://web.archive.org/web/{stamp}id_/{original}")
+                        r.raise_for_status()
+                        path.write_text(r.text, encoding="utf-8")
+                        time.sleep(1)  # be nice to the archive
                     files.append((path, stamp_to_date(stamp)))
-                    time.sleep(1)  # be nice to the archive
 
             elif src["method"] == "ecfr":
                 for day in src["snapshots"].split(";"):
+                    path = out_dir / f"{day}.xml"
+                    if path.exists():
+                        files.append((path, day))
+                        continue
                     r = client.get(
                         f"https://www.ecfr.gov/api/versioner/v1/full/{day}/title-16.xml",
                         params={"part": "255"},
                         headers={"Accept-Encoding": "gzip"},
                     )
                     r.raise_for_status()
-                    path = out_dir / f"{day}.xml"
                     path.write_text(r.text, encoding="utf-8")
                     files.append((path, day))
         except (httpx.HTTPError, ValueError) as e:
@@ -169,9 +173,9 @@ def download_cuad(client, n):
         txt_files = sorted(n for n in names if "full_contract_txt/" in n and n.endswith(".txt"))
         sample = random.Random(settings.seed).sample(txt_files, n)
         rows = []
-        for name in sample:
+        for i, name in enumerate(sample, start=1):
             stem = Path(name).stem
-            doc_id = "cuad_" + "".join(c if c.isalnum() else "_" for c in stem)[:60].lower()
+            doc_id = f"cuad_{i:03d}"  # file names are long and not unique when cut
             path = cuad_dir / "contracts" / f"{doc_id}.txt"
             path.parent.mkdir(exist_ok=True)
             text = io.TextIOWrapper(z.open(name), encoding="utf-8", errors="ignore").read()
