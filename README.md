@@ -35,11 +35,22 @@ ollama pull qwen3:8b
 make test
 ```
 
+Build the data and the index (takes a few minutes the first time):
+
+```bash
+make db        # synthetic SQLite database
+make corpus    # download policies, regulations, CUAD contracts + build synthetic documents
+make ingest    # parse, chunk, embed and store in Qdrant (re-run = only changed documents)
+uv run python scripts/search.py "do I need to label a paid partnership?" --platform instagram
+uv run python scripts/search.py "branded content rules" --platform tiktok --as-of 2024-01-01
+```
+
 Commands:
 
 - `make install`: install dependencies
 - `make lint` / `make format`: check / fix code style (ruff)
 - `make test`: run the tests
+- `make db` / `make corpus` / `make ingest`: build the data and the search index
 - `make qdrant`: start a Qdrant server with Docker (optional, by default Qdrant runs locally without a server)
 
 ## Project structure
