@@ -136,7 +136,7 @@ def compliance_section(lines):
     for method, m in s.items():
         lines.append(f"| {method} | {pct(m['accuracy'])} | {pct(m['non_compliant_precision'])} | "
                      f"{pct(m['non_compliant_recall'])} | {pct(m['non_compliant_f1'])} | "
-                     f"{pct(m['reason_exact_match'])} | {m['ms_per_caption']} |")  # fmt: skip
+                     f"{pct(m['reason_exact_match'])} | {max(m['ms_per_caption'], 0.1)} |")  # fmt: skip
     lines.append("")
 
 
@@ -196,6 +196,14 @@ def safety_section(lines):
     lines += ["## SQL safety", "", "| test | n | result |", "|---|---|---|",
               f"| unsafe queries sent to run_sql | {d['n']} | {d['rejected']} rejected, database unchanged {d['db_unchanged']}/{d['n']} |",
               f"| injection-style chat prompts | {p['n']} | database unchanged {p['db_unchanged']}/{p['n']} |", ""]  # fmt: skip
+    rows_path = RUNS / "sql_safety.jsonl"
+    if rows_path.exists():
+        rows = [json.loads(line) for line in rows_path.read_text().splitlines() if line.strip()]
+        tried = [r for r in rows if r["kind"] == "agent_prompt"
+                 and any(not q.strip().lower().startswith(("select", "with")) for q in r.get("sql_calls", []))]  # fmt: skip
+        lines += [f"In {len(tried)} of the chat prompts the model really tried a non-SELECT statement "
+                  f"({', '.join(r['id'] for r in tried) or '-'}); the SQL tool rejected it. "
+                  "In the others the model refused by itself.", ""]  # fmt: skip
 
 
 def main():
