@@ -1,0 +1,144 @@
+// Small wrapper around the FastAPI backend + the types it returns.
+
+export type DocSource = {
+  kind: 'document'
+  n: number
+  doc_id: string
+  title: string
+  doc_type: string
+  platform: string | null
+  section: string | null
+  snapshot_date: string | null
+  version: number | null
+  is_latest: boolean | null
+  source_url: string | null
+  synthetic: boolean
+  clause_type: string | null
+  char_start: number | null
+  char_end: number | null
+  score: number
+  text: string
+}
+
+export type SqlSource = {
+  kind: 'sql'
+  n: number
+  query: string
+  columns: string[]
+  rows: unknown[][]
+  truncated: boolean
+}
+
+export type Change = {
+  section: string
+  change: 'added' | 'removed' | 'modified'
+  new_text?: string
+  old_text?: string
+  diff?: string[]
+}
+
+export type ComparisonSource = {
+  kind: 'comparison'
+  n: number
+  doc_id: string
+  title: string
+  old_version: { version: number; snapshot_date: string }
+  new_version: { version: number; snapshot_date: string }
+  n_changes: number
+  changes: Change[]
+}
+
+export type Source = DocSource | SqlSource | ComparisonSource
+
+export type Approval = {
+  approval_id: number
+  action: string
+  requested_at: string
+  decision: string | null
+  decided_at: string | null
+  decided_by: string | null
+  creator_id?: number
+  creator_name?: string
+  platform?: string
+  post_datetime?: string
+  caption?: string
+}
+
+export type ChatResult = {
+  thread_id: string
+  status: 'done' | 'waiting_approval'
+  question: string
+  route: string
+  answer: string | null
+  pending_approval: Approval | null
+  approval: Approval | null
+  citations: number[]
+  invalid_citations: number[]
+  abstained: boolean
+  unverified: boolean
+  sources: Source[]
+  tool_calls: { name: string; arguments: Record<string, unknown> }[]
+  usage: Record<string, number>
+  latency_s: number
+}
+
+export type SqlResult = {
+  query?: string
+  columns?: string[]
+  rows?: unknown[][]
+  row_count?: number
+  truncated?: boolean
+  error?: string
+}
+
+export type ScheduledPost = {
+  schedule_id: number
+  scheduled_at: string
+  caption: string
+  status: string
+  creator: string
+  platform: string
+}
+
+export type DocumentText = {
+  doc_id: string
+  title: string
+  version: number
+  versions: { version: number; snapshot_date: string; is_latest: boolean }[]
+  source_url: string | null
+  synthetic: boolean
+  text: string
+}
+
+async function request<T>(path: string, body?: unknown): Promise<T> {
+  const response = await fetch('/api' + path, {
+    method: body === undefined ? 'GET' : 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  })
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}))
+    throw new Error(data.detail || `Error ${response.status}`)
+  }
+  return response.json()
+}
+
+export const api = {
+  health: () => request<{ status: string; llm: string; model: string }>('/health'),
+  chat: (question: string, thread_id?: string) =>
+    request<ChatResult>('/chat', { question, thread_id }),
+  approvals: (status = 'pending') => request<Approval[]>(`/approvals?status=${status}`),
+  decide: (id: number, approved: boolean) =>
+    request<ChatResult | { status: string; approval: Approval }>(`/approvals/${id}/decision`, {
+      approved,
+      decided_by: 'account_manager',
+    }),
+  schedule: () => request<ScheduledPost[]>('/schedule'),
+  sql: (query: string) => request<SqlResult>('/sql', { query }),
+  schema: () =>
+    request<{ tables: Record<string, { description: string; columns: Record<string, string> }> }>(
+      '/schema',
+    ),
+  document: (docId: string, version?: number | null) =>
+    request<DocumentText>(`/documents/${docId}` + (version ? `?version=${version}` : '')),
+}
