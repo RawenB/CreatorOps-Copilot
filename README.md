@@ -76,10 +76,28 @@ Web UI (needs Node 20+ and `make api` running in another terminal):
 make ui    # React app on http://localhost:5173
 ```
 
-The UI has 4 tabs: **Chat** (answers with clickable citations, the sources panel shows the passage
-highlighted in the full document, the SQL query + rows, or the policy diff), **Approvals** (approve or
-reject the agent's / MCP client's scheduling requests), **Calendar** (scheduled posts) and **SQL**
-(read-only console with the schema).
+The UI has 6 pages:
+
+- **Chat**: answers with clickable citations; the sources panel shows the passage highlighted in the stored
+  document (any stored version), the SQL query + rows, the policy diff, the compliance verdict or the ticket
+  the assistant created.
+- **Tickets**: tasks (open / in progress / done) and post requests, each with an id (`TCK-0007`), a link
+  (draft, brief, asset) and a checked reference (contract `C003`, campaign, post, creator or policy
+  document, which opens in the viewer). A ticket can be shared with its URL (`/#/tickets/7`). Tickets are
+  also created automatically: every scheduling request (from the chat, the form or an MCP client) opens a
+  post-request ticket, the assistant can create tasks ("create a ticket to fix post 166"), and the Analytics
+  page proposes a ticket for every anomaly.
+- **Approvals**: approve or reject scheduling requests (nothing is scheduled before).
+- **Analytics**: KPIs, reach / engagement by month, engagement by format, creators table, and "things to
+  check" found automatically (undisclosed paid posts, likes rising much more than reach, viral posts, reach
+  drops). The data is **synthetic** (see below).
+- **Calendar**: scheduled posts by month. **SQL**: read-only console with examples and the schema.
+
+**Where the analytics come from:** `scripts/generate_analytics_db.py` generates the SQLite database
+(8 fictional creators, 1,418 posts from May to October 2026, daily metrics, campaigns, contracts index)
+with a fixed seed, including a few planted problems to find. Real metrics would come from the Instagram
+Graph API / TikTok / YouTube business APIs (a Meta business account and app review are needed), which is
+out of scope for this project; the database schema is the same one such an import would fill.
 
 Commands:
 

@@ -13,7 +13,11 @@ for example Claude Desktop, Cursor or the small demo client in `examples/`.
 | `find_clause` | find a clause type (exclusivity, payment, ...) in the contracts | no |
 | `run_sql` | one read-only SELECT on the analytics database | no |
 | `explain_schema` | tables, columns and join keys | no |
-| `schedule_post` | creates a **pending approval**, nothing is scheduled yet | approvals table only |
+| `check_post_compliance` | checklist verdict for a caption, with the cited rules | no |
+| `classify_clause` | clause type with the fine-tuned classifier | no |
+| `create_ticket` | task ticket with an optional link and reference | tickets only |
+| `list_tickets` | tasks and post requests with their status | no |
+| `schedule_post` | creates a **pending approval** (+ its ticket), nothing is scheduled yet | approvals + tickets |
 | `list_approvals` | list pending / approved / rejected requests | no |
 
 There is also one resource, `creatorops://schema`, with the schema as plain text.

@@ -51,7 +51,16 @@ here #ad'."**
 - Calendar tab: nothing new yet. Approve, the agent finishes its answer, the post appears in the calendar.
 - Then: "Schedule a post for Creator Z ..." is refused (unknown creator, nothing is created).
 
-## 6. MCP (1 min)
+## 6. Analytics and tickets (2 min)
+
+- Analytics page: point at the "synthetic data" banner, switch Instagram / TikTok, hover the chart.
+- "Things to check": click **Create ticket** on the Creator F likes spike, add a link, create it. The app
+  opens the ticket (TCK-...), copy its link. The reference is Creator F; contract and policy references
+  have an "Open" button that shows the document.
+- Chat: **"Create a high priority ticket to add a disclosure to post 166"**: the assistant creates it and
+  gives the code. The post request of step 5 is also in the Tickets list, with its approval status.
+
+## 7. MCP (1 min)
 
 ```bash
 uv run python examples/mcp_client_demo.py
@@ -60,7 +69,7 @@ uv run python examples/mcp_client_demo.py
 Shows the tool list and 4 tool calls from an external MCP client; its `schedule_post` request shows up in
 the Approvals tab of the UI.
 
-## 7. Results (1 min)
+## 8. Results (1 min)
 
 Open `reports/eval_results.md`: v1 vs v2 table, the judge vs manual spot check, the fine-tuning table
 (`reports/finetuning.md`), and one or two failures from `docs/error_analysis.md` (router gap for

@@ -78,3 +78,9 @@ All written by hand for this project, in English.
 
 Gold answers come from the stored document snapshots and the synthetic database; they say what the
 documents said at snapshot time, not what the law is today.
+
+## Tickets (`tickets` table, created on first use)
+
+Written by the app, not generated: tasks and post requests created in the UI, by the assistant or by MCP
+clients. Columns: kind, title, description, status, priority, assignee, link, reference (type, id, label),
+approval_id, created_by, created_at, updated_at. Not readable by the SQL tool (not in its allowlist).
