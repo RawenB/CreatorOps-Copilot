@@ -33,8 +33,20 @@ HEADERS = {"User-Agent": "Mozilla/5.0 (student research project; corpus download
 TODAY = date.today().isoformat()
 
 MANIFEST_COLUMNS = [
-    "doc_id", "title", "doc_type", "platform", "publisher", "source_url", "retrieved_at",
-    "doc_date", "snapshot_date", "version", "license", "language", "synthetic", "num_pages",
+    "doc_id",
+    "title",
+    "doc_type",
+    "platform",
+    "publisher",
+    "source_url",
+    "retrieved_at",
+    "doc_date",
+    "snapshot_date",
+    "version",
+    "license",
+    "language",
+    "synthetic",
+    "num_pages",
     "file_path",
 ]
 
@@ -43,8 +55,14 @@ def wayback_snapshots(client, url):
     """List of (timestamp, original_url) for successful captures, one per month."""
     r = client.get(
         "http://web.archive.org/cdx/search/cdx",
-        params={"url": url, "output": "json", "fl": "timestamp,original",
-                "filter": "statuscode:200", "collapse": "timestamp:6", "from": "2023"},
+        params={
+            "url": url,
+            "output": "json",
+            "fl": "timestamp,original",
+            "filter": "statuscode:200",
+            "collapse": "timestamp:6",
+            "from": "2023",
+        },
     )
     rows = r.json()
     return [(row[0], row[1]) for row in rows[1:]]
@@ -106,14 +124,25 @@ def download_policies(client):
             continue
 
         for version, (path, snap_date) in enumerate(files, start=1):
-            rows.append({
-                "doc_id": src["doc_id"], "title": src["title"], "doc_type": src["doc_type"],
-                "platform": src["platform"], "publisher": src["publisher"],
-                "source_url": src["url"], "retrieved_at": TODAY, "doc_date": snap_date,
-                "snapshot_date": snap_date, "version": version, "license": src["license"],
-                "language": "en", "synthetic": False, "num_pages": "",
-                "file_path": str(path.relative_to(settings.data_dir)),
-            })
+            rows.append(
+                {
+                    "doc_id": src["doc_id"],
+                    "title": src["title"],
+                    "doc_type": src["doc_type"],
+                    "platform": src["platform"],
+                    "publisher": src["publisher"],
+                    "source_url": src["url"],
+                    "retrieved_at": TODAY,
+                    "doc_date": snap_date,
+                    "snapshot_date": snap_date,
+                    "version": version,
+                    "license": src["license"],
+                    "language": "en",
+                    "synthetic": False,
+                    "num_pages": "",
+                    "file_path": str(path.relative_to(settings.data_dir)),
+                }
+            )
         print(f"  {src['doc_id']}: {len(files)} snapshot(s)")
     return rows
 
@@ -147,14 +176,25 @@ def download_cuad(client, n):
             path.parent.mkdir(exist_ok=True)
             text = io.TextIOWrapper(z.open(name), encoding="utf-8", errors="ignore").read()
             path.write_text(text, encoding="utf-8")
-            rows.append({
-                "doc_id": doc_id, "title": stem, "doc_type": "contract", "platform": "",
-                "publisher": "CUAD (The Atticus Project)",
-                "source_url": "https://zenodo.org/records/4595826", "retrieved_at": TODAY,
-                "doc_date": "", "snapshot_date": "", "version": 1, "license": "CC BY 4.0",
-                "language": "en", "synthetic": False, "num_pages": "",
-                "file_path": str(path.relative_to(settings.data_dir)),
-            })
+            rows.append(
+                {
+                    "doc_id": doc_id,
+                    "title": stem,
+                    "doc_type": "contract",
+                    "platform": "",
+                    "publisher": "CUAD (The Atticus Project)",
+                    "source_url": "https://zenodo.org/records/4595826",
+                    "retrieved_at": TODAY,
+                    "doc_date": "",
+                    "snapshot_date": "",
+                    "version": 1,
+                    "license": "CC BY 4.0",
+                    "language": "en",
+                    "synthetic": False,
+                    "num_pages": "",
+                    "file_path": str(path.relative_to(settings.data_dir)),
+                }
+            )
     print(f"  CUAD: {len(rows)} contracts")
     return rows
 
@@ -163,13 +203,26 @@ def build_synthetic_contracts():
     if not settings.db_path.exists():
         raise SystemExit("Run scripts/generate_analytics_db.py first.")
     docs = write_contracts(settings.db_path, RAW / "synthetic_contracts", seed=settings.seed)
-    rows = [{
-        "doc_id": d["doc_id"], "title": d["title"], "doc_type": "contract", "platform": "",
-        "publisher": "CreatorOps (synthetic)", "source_url": "", "retrieved_at": TODAY,
-        "doc_date": d["doc_date"], "snapshot_date": "", "version": 1,
-        "license": "CC BY 4.0 (project-generated)", "language": "en", "synthetic": True,
-        "num_pages": "", "file_path": str(d["path"].relative_to(settings.data_dir)),
-    } for d in docs]
+    rows = [
+        {
+            "doc_id": d["doc_id"],
+            "title": d["title"],
+            "doc_type": "contract",
+            "platform": "",
+            "publisher": "CreatorOps (synthetic)",
+            "source_url": "",
+            "retrieved_at": TODAY,
+            "doc_date": d["doc_date"],
+            "snapshot_date": "",
+            "version": 1,
+            "license": "CC BY 4.0 (project-generated)",
+            "language": "en",
+            "synthetic": True,
+            "num_pages": "",
+            "file_path": str(d["path"].relative_to(settings.data_dir)),
+        }
+        for d in docs
+    ]
     print(f"  synthetic contracts: {len(rows)}")
     return rows
 
@@ -182,13 +235,25 @@ def copy_sops():
         target = out_dir / path.name
         shutil.copy(path, target)
         title = path.read_text(encoding="utf-8").splitlines()[0].lstrip("# ").strip()
-        rows.append({
-            "doc_id": path.stem, "title": title, "doc_type": "sop", "platform": "",
-            "publisher": "CreatorOps (synthetic)", "source_url": "", "retrieved_at": TODAY,
-            "doc_date": "2026-01-15", "snapshot_date": "", "version": 1,
-            "license": "CC BY 4.0 (project-generated)", "language": "en", "synthetic": True,
-            "num_pages": "", "file_path": str(target.relative_to(settings.data_dir)),
-        })
+        rows.append(
+            {
+                "doc_id": path.stem,
+                "title": title,
+                "doc_type": "sop",
+                "platform": "",
+                "publisher": "CreatorOps (synthetic)",
+                "source_url": "",
+                "retrieved_at": TODAY,
+                "doc_date": "2026-01-15",
+                "snapshot_date": "",
+                "version": 1,
+                "license": "CC BY 4.0 (project-generated)",
+                "language": "en",
+                "synthetic": True,
+                "num_pages": "",
+                "file_path": str(target.relative_to(settings.data_dir)),
+            }
+        )
     print(f"  SOPs: {len(rows)}")
     return rows
 
@@ -214,8 +279,10 @@ def main():
         writer = csv.DictWriter(f, fieldnames=MANIFEST_COLUMNS)
         writer.writeheader()
         writer.writerows(rows)
-    print(f"{len(rows)} files, {len({r['doc_id'] for r in rows})} documents -> "
-          f"{settings.manifest_path}")
+    print(
+        f"{len(rows)} files, {len({r['doc_id'] for r in rows})} documents -> "
+        f"{settings.manifest_path}"
+    )
 
 
 if __name__ == "__main__":

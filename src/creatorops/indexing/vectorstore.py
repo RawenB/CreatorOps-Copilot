@@ -48,7 +48,11 @@ class VectorStore:
         """Called when a newer version of doc_id is ingested."""
         self.client.set_payload(
             self.collection,
-            payload={"is_latest": False, "valid_to": valid_to, "valid_to_int": date_to_int(valid_to)},
+            payload={
+                "is_latest": False,
+                "valid_to": valid_to,
+                "valid_to_int": date_to_int(valid_to),
+            },
             points=models.Filter(
                 must=[
                     models.FieldCondition(key="doc_id", match=models.MatchValue(value=doc_id)),

@@ -80,7 +80,7 @@ def exclusivity_text(exclusive: int, category: str | None, brand: str, rng: rand
     return (
         f"4.1 During the Term and for {months} month(s) after it ends, the Creator will not promote, "
         f"endorse or create sponsored content for any competitor of {brand} in the {category} "
-        f"category.\n4.2 A \"competitor\" means any company whose main products are in the "
+        f'category.\n4.2 A "competitor" means any company whose main products are in the '
         f"{category} category."
     )
 
@@ -101,8 +101,19 @@ def write_contracts(db_path: Path, out_dir: Path, seed: int = 42) -> list[dict]:
     conn.close()
 
     docs = []
-    for (contract_id, doc_id, start, end, fee, exclusive, ex_category, brand, brand_category,
-         creator, country) in rows:
+    for (
+        contract_id,
+        doc_id,
+        start,
+        end,
+        fee,
+        exclusive,
+        ex_category,
+        brand,
+        brand_category,
+        creator,
+        country,
+    ) in rows:
         n_reels = rng.randint(1, 4)
         n_stories = rng.randint(2, 6)
         if brand_category == "alcohol":
@@ -125,46 +136,56 @@ def write_contracts(db_path: Path, out_dir: Path, seed: int = 42) -> list[dict]:
             creator=creator,
             start_date=start,
             end_date=end,
-            renewal=rng.choice([
-                "This Agreement does not renew automatically.",
-                "This Agreement renews automatically for one additional period of 3 months unless "
-                "either party gives 30 days written notice before the end of the Term.",
-            ]),
+            renewal=rng.choice(
+                [
+                    "This Agreement does not renew automatically.",
+                    "This Agreement renews automatically for one additional period of 3 months unless "
+                    "either party gives 30 days written notice before the end of the Term.",
+                ]
+            ),
             deliverables=f"{n_reels} Instagram Reel(s), {n_stories} Instagram Stories and "
             f"{rng.randint(1, 3)} TikTok video(s)",
             review_days=rng.choice([2, 3, 5]),
             revisions=rng.choice([1, 2]),
             fee=fee,
-            payment_split=rng.choice([
-                "50% of the fee is paid at signature and 50% after the last deliverable is published.",
-                "100% of the fee is paid after the last deliverable is published.",
-                "30% of the fee is paid at signature and 70% after the campaign report is delivered.",
-            ]),
+            payment_split=rng.choice(
+                [
+                    "50% of the fee is paid at signature and 50% after the last deliverable is published.",
+                    "100% of the fee is paid after the last deliverable is published.",
+                    "30% of the fee is paid at signature and 70% after the campaign report is delivered.",
+                ]
+            ),
             net_days=rng.choice([30, 45, 60]),
             late_interest=rng.choice([1, 1.5]),
             exclusivity=exclusivity_text(exclusive, ex_category, brand, rng),
             usage_months=rng.choice([3, 6, 12]),
-            paid_usage=rng.choice([
-                "Using the content in paid advertising (whitelisting / boosting) requires a separate "
-                "written agreement and an additional fee.",
-                f"The Brand may use the content in paid advertising for {rng.choice([30, 60, 90])} "
-                "days, included in the fee.",
-            ]),
+            paid_usage=rng.choice(
+                [
+                    "Using the content in paid advertising (whitelisting / boosting) requires a separate "
+                    "written agreement and an additional fee.",
+                    f"The Brand may use the content in paid advertising for {rng.choice([30, 60, 90])} "
+                    "days, included in the fee.",
+                ]
+            ),
             category_rule=category_rule,
             notice_days=rng.choice([14, 30]),
-            kill_fee=rng.choice([
-                "If the Brand terminates without cause, it pays for all deliverables already published.",
-                "If the Brand terminates without cause, it pays 50% of the remaining fee as a kill fee.",
-            ]),
+            kill_fee=rng.choice(
+                [
+                    "If the Brand terminates without cause, it pays for all deliverables already published.",
+                    "If the Brand terminates without cause, it pays 50% of the remaining fee as a kill fee.",
+                ]
+            ),
             confidential_years=rng.choice([1, 2, 3]),
             law=GOVERNING_LAW[country],
         )
         path = out_dir / f"{doc_id}.md"
         path.write_text(text, encoding="utf-8")
-        docs.append({
-            "doc_id": doc_id,
-            "title": f"Influencer Marketing Agreement {contract_id} ({brand} x {creator})",
-            "path": path,
-            "doc_date": start,
-        })
+        docs.append(
+            {
+                "doc_id": doc_id,
+                "title": f"Influencer Marketing Agreement {contract_id} ({brand} x {creator})",
+                "path": path,
+                "doc_date": start,
+            }
+        )
     return docs

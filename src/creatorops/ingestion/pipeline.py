@@ -27,30 +27,34 @@ def build_chunk_dicts(row: dict, text: str, version: int, text_hash: str, chunke
     now = datetime.now().isoformat(timespec="seconds")
     result = []
     for i, c in enumerate(chunks):
-        result.append({
-            "chunk_id": f"{row['doc_id']}:v{version}:{i}",
-            "doc_id": row["doc_id"],
-            "doc_type": row["doc_type"],
-            "platform": row["platform"] or None,
-            "title": row["title"],
-            "section_path": c.section_path,
-            "page": None,  # our sources are HTML / text, no pages
-            "char_start": c.char_start,
-            "char_end": c.char_end,
-            "doc_date": row["doc_date"] or None,
-            "snapshot_date": row["snapshot_date"] or None,
-            "version": version,
-            "is_latest": True,
-            "valid_from": row["snapshot_date"] or row["doc_date"] or None,
-            "valid_to": None,
-            "source_url": row["source_url"] or None,
-            "synthetic": row["synthetic"] == "True",
-            "content_hash": text_hash,
-            "ingested_at": now,
-            "clause_type": guess_clause_type(c.section_path) if row["doc_type"] == "contract" else None,
-            "file_path": row["file_path"],
-            "text": c.text,
-        })
+        result.append(
+            {
+                "chunk_id": f"{row['doc_id']}:v{version}:{i}",
+                "doc_id": row["doc_id"],
+                "doc_type": row["doc_type"],
+                "platform": row["platform"] or None,
+                "title": row["title"],
+                "section_path": c.section_path,
+                "page": None,  # our sources are HTML / text, no pages
+                "char_start": c.char_start,
+                "char_end": c.char_end,
+                "doc_date": row["doc_date"] or None,
+                "snapshot_date": row["snapshot_date"] or None,
+                "version": version,
+                "is_latest": True,
+                "valid_from": row["snapshot_date"] or row["doc_date"] or None,
+                "valid_to": None,
+                "source_url": row["source_url"] or None,
+                "synthetic": row["synthetic"] == "True",
+                "content_hash": text_hash,
+                "ingested_at": now,
+                "clause_type": guess_clause_type(c.section_path)
+                if row["doc_type"] == "contract"
+                else None,
+                "file_path": row["file_path"],
+                "text": c.text,
+            }
+        )
     return result
 
 

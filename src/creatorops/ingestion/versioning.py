@@ -91,8 +91,13 @@ class Registry:
         self.conn.executemany(
             "INSERT OR REPLACE INTO chunks VALUES (?, ?, ?, ?, ?)",
             [
-                (c["chunk_id"], c["doc_id"], c["version"], c["text"],
-                 json.dumps({k: v for k, v in c.items() if k != "text"}))
+                (
+                    c["chunk_id"],
+                    c["doc_id"],
+                    c["version"],
+                    c["text"],
+                    json.dumps({k: v for k, v in c.items() if k != "text"}),
+                )
                 for c in chunks
             ],
         )

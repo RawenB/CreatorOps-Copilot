@@ -22,7 +22,10 @@ class Embedder:
 
     def embed_documents(self, texts: list[str], batch_size: int = 32) -> np.ndarray:
         return self.model.encode(
-            texts, batch_size=batch_size, normalize_embeddings=True, show_progress_bar=len(texts) > 200
+            texts,
+            batch_size=batch_size,
+            normalize_embeddings=True,
+            show_progress_bar=len(texts) > 200,
         )
 
     def embed_query(self, query: str) -> np.ndarray:

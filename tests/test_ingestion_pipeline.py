@@ -10,9 +10,23 @@ from creatorops.ingestion.pipeline import ingest
 from creatorops.ingestion.versioning import Registry
 from creatorops.retrieval.dense import DenseRetriever
 
-COLUMNS = ["doc_id", "title", "doc_type", "platform", "publisher", "source_url", "retrieved_at",
-           "doc_date", "snapshot_date", "version", "license", "language", "synthetic",
-           "num_pages", "file_path"]
+COLUMNS = [
+    "doc_id",
+    "title",
+    "doc_type",
+    "platform",
+    "publisher",
+    "source_url",
+    "retrieved_at",
+    "doc_date",
+    "snapshot_date",
+    "version",
+    "license",
+    "language",
+    "synthetic",
+    "num_pages",
+    "file_path",
+]
 
 OLD_POLICY = "# Branded content\n\n## Disclosure\n\n" + (
     "Creators should add #ad somewhere in the caption of a sponsored post. " * 6
@@ -34,9 +48,16 @@ def write_manifest(tmp_path, rows):
 
 
 def policy_row(snapshot, filename):
-    return {"doc_id": "bc_policy", "title": "Branded Content Policy",
-            "doc_type": "platform_policy", "platform": "instagram", "snapshot_date": snapshot,
-            "doc_date": snapshot, "synthetic": "False", "file_path": filename}
+    return {
+        "doc_id": "bc_policy",
+        "title": "Branded Content Policy",
+        "doc_type": "platform_policy",
+        "platform": "instagram",
+        "snapshot_date": snapshot,
+        "doc_date": snapshot,
+        "synthetic": "False",
+        "file_path": filename,
+    }
 
 
 @pytest.fixture
@@ -52,12 +73,20 @@ def setup(tmp_path):
 
 def test_versions_and_filters(setup):
     tmp_path, embedder, store, registry = setup
-    write_manifest(tmp_path, [
-        policy_row("2024-06-01", "old.md"),
-        policy_row("2026-01-01", "new.md"),
-        {"doc_id": "contract_1", "title": "Contract 1", "doc_type": "contract",
-         "synthetic": "True", "file_path": "contract.md"},
-    ])
+    write_manifest(
+        tmp_path,
+        [
+            policy_row("2024-06-01", "old.md"),
+            policy_row("2026-01-01", "new.md"),
+            {
+                "doc_id": "contract_1",
+                "title": "Contract 1",
+                "doc_type": "contract",
+                "synthetic": "True",
+                "file_path": "contract.md",
+            },
+        ],
+    )
     report = ingest(tmp_path / "manifest.csv", tmp_path, registry, store, embedder)
     assert report["new"] == 2 and report["updated"] == 1
 

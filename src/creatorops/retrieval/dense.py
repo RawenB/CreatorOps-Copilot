@@ -27,7 +27,7 @@ def format_citation(chunk: dict) -> str:
     """Short human-readable citation for a chunk."""
     parts = [chunk["title"]]
     if chunk.get("section_path"):
-        parts.append(f"section \"{chunk['section_path']}\"")
+        parts.append(f'section "{chunk["section_path"]}"')
     if chunk.get("snapshot_date"):
         parts.append(f"snapshot {chunk['snapshot_date']} (v{chunk['version']})")
     if chunk.get("synthetic"):
