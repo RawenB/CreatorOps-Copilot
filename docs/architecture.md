@@ -55,3 +55,18 @@ snapshot_date, version, is_latest, source_url, synthetic, content_hash, ingested
 | `POST /sql`, `GET /schema` | read-only SQL panel |
 | `POST /search` | hybrid search with filters |
 | `GET /documents/{doc_id}?version=` | full text of a document version + list of versions, to highlight a cited passage with `char_start` / `char_end` |
+
+## React UI (`app/`, `make ui`)
+
+Vite + React + TypeScript, no UI library. The dev server sends `/api/*` to FastAPI on port 8000.
+
+| File | What it shows |
+|---|---|
+| `src/api.ts` | fetch helpers + types of the API responses |
+| `components/Chat.tsx` | questions, answers, approval cards, sources panel |
+| `components/Answer.tsx` | answer text, `[n]` turned into clickable citations (invalid ones crossed out), abstain / unverified warnings |
+| `components/SourceCard.tsx` | one source: document passage, SQL query + rows, or policy version diff |
+| `components/DocumentViewer.tsx` | full text of the cited version with the passage highlighted (`char_start` / `char_end`) |
+| `components/Approvals.tsx` | approval queue with approve / reject |
+| `components/Calendar.tsx` | month view of the `schedule` table |
+| `components/SqlPanel.tsx` | read-only SQL console + schema |

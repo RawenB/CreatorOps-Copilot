@@ -19,7 +19,7 @@ End-of-course project, AI Engineering (TEK-UP, ING-4-SDIA). All creator and anal
 | 1 | Setup, corpus + snapshots, synthetic DB, ingestion with versions, dense retrieval | done |
 | 2 | Hybrid search (BM25 + dense) + reranker, tools (policies, contracts, SQL) | done |
 | 3 | LangGraph agent (router, approvals, citations), FastAPI | done |
-| 4 | MCP server + client demo, React UI | |
+| 4 | MCP server + client demo, React UI | done |
 | 5 | Eval set (120+ questions), retrieval / generation / SQL / agent metrics | |
 | 6 | Fine-tuning (clause classifier on Colab), ablations, compliance checker | |
 | 7 | Error analysis, report notes, demo | |
@@ -53,6 +53,17 @@ uv run python scripts/ask.py "Schedule a post for Creator D on Instagram on 2026
 make api   # FastAPI on http://localhost:8000 (docs at /docs)
 ```
 
+Web UI (needs Node 20+ and `make api` running in another terminal):
+
+```bash
+make ui    # React app on http://localhost:5173
+```
+
+The UI has 4 tabs: **Chat** (answers with clickable citations, the sources panel shows the passage
+highlighted in the full document, the SQL query + rows, or the policy diff), **Approvals** (approve or
+reject the agent's / MCP client's scheduling requests), **Calendar** (scheduled posts) and **SQL**
+(read-only console with the schema).
+
 Commands:
 
 - `make install`: install dependencies
@@ -60,6 +71,7 @@ Commands:
 - `make test`: run the tests
 - `make db` / `make corpus` / `make ingest`: build the data and the search index
 - `make api`: start the FastAPI backend
+- `make ui`: start the React UI (Vite dev server)
 - `make mcp`: start the MCP server (stdio), see [docs/mcp.md](docs/mcp.md) for the Claude Desktop config
 - `make qdrant`: start a Qdrant server with Docker (optional, by default Qdrant runs locally without a server)
 
