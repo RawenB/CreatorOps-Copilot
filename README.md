@@ -16,7 +16,7 @@ End-of-course project, AI Engineering (TEK-UP, ING-4-SDIA). All creator and anal
 
 | Day | Work | Status |
 |---|---|---|
-| 1 | Setup, corpus + snapshots, synthetic DB, ingestion with versions, dense retrieval | in progress |
+| 1 | Setup, corpus + snapshots, synthetic DB, ingestion with versions, dense retrieval | done |
 | 2 | Hybrid search (BM25 + dense) + reranker, tools (policies, contracts, SQL) | |
 | 3 | LangGraph agent (router, approvals, citations), FastAPI | |
 | 4 | MCP server + client demo, React UI | |
