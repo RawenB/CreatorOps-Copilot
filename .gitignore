@@ -21,7 +21,7 @@ data/raw/
 data/processed/
 data/*.sqlite
 data/*.sqlite-*
-data/qdrant/
+data/qdrant*/
 
 # Models, experiment tracking, checkpoints
 models/

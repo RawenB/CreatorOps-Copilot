@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      # CI never calls a real LLM: the deterministic fake provider is used.
+      CREATOROPS_LLM_PROVIDER: fake
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install (frozen lockfile)
+        run: uv sync --frozen
+
+      - name: Lint
+        run: make lint
+
+      - name: Type check
+        run: make typecheck
+
+      - name: Tests
+        run: uv run pytest -m "not slow and not integration" --cov=creatorops --cov-report=term-missing
+
+      # A tiny smoke eval (a handful of questions on a fixture corpus) is added here in Phase 2.
