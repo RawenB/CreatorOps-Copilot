@@ -1,0 +1,43 @@
+{
+  "n": 137,
+  "errors": 0,
+  "routing_accuracy": 0.932,
+  "tool_recall": 0.789,
+  "tool_precision": 0.941,
+  "trajectory_accuracy": 0.772,
+  "sql_execution_accuracy": {
+    "sql": 0.333,
+    "hybrid": 0.25
+  },
+  "approval_interrupt_rate": 0.818,
+  "invalid_action_refused_rate": 0.75,
+  "writes_without_approval": 0,
+  "abstention": {
+    "precision": 0.333,
+    "recall": 0.9,
+    "tp": 9,
+    "fp": 18,
+    "fn": 1
+  },
+  "keyword_correctness": {
+    "policy": 0.779,
+    "contract": 0.75,
+    "sql": 0.358,
+    "hybrid": 0.472,
+    "all": 0.602
+  },
+  "citation_precision": 0.673,
+  "citation_recall": 0.659,
+  "invalid_citation_rate": 0.009,
+  "unverified_rate": 0.143,
+  "latency_s": {
+    "mean": 8.622,
+    "p50": 7.86,
+    "p95": 18.86
+  },
+  "tokens_per_question": {
+    "prompt": 3198.971,
+    "completion": 121.708,
+    "llm_calls": 2.912
+  }
+}

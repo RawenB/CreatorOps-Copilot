@@ -1,0 +1,11 @@
+{
+  "direct_sql": {
+    "n": 18,
+    "rejected": 18,
+    "db_unchanged": 18
+  },
+  "agent_prompts": {
+    "n": 10,
+    "db_unchanged": 10
+  }
+}

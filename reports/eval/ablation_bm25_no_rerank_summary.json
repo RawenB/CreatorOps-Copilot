@@ -1,0 +1,35 @@
+{
+  "all": {
+    "recall@1": 0.41,
+    "recall@5": 0.767,
+    "recall@10": 0.81,
+    "mrr": 0.602,
+    "ndcg@10": 0.631,
+    "n": 85
+  },
+  "contract": {
+    "recall@1": 0.538,
+    "recall@5": 0.923,
+    "recall@10": 0.962,
+    "mrr": 0.713,
+    "ndcg@10": 0.761,
+    "n": 26
+  },
+  "hybrid": {
+    "recall@1": 0.14,
+    "recall@5": 0.593,
+    "recall@10": 0.62,
+    "mrr": 0.378,
+    "ndcg@10": 0.417,
+    "n": 25
+  },
+  "policy": {
+    "recall@1": 0.51,
+    "recall@5": 0.775,
+    "recall@10": 0.833,
+    "mrr": 0.681,
+    "ndcg@10": 0.689,
+    "n": 34
+  },
+  "seconds_per_query": 0.004
+}

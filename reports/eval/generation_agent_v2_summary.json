@@ -1,0 +1,39 @@
+{
+  "n_answered": 106,
+  "n_graded": 106,
+  "policy": {
+    "n": 33,
+    "faithfulness_mean": 4.42,
+    "faithful_rate": 0.848,
+    "correctness": 0.864,
+    "correct_rate": 0.788
+  },
+  "contract": {
+    "n": 24,
+    "faithfulness_mean": 4.67,
+    "faithful_rate": 0.833,
+    "correctness": 0.938,
+    "correct_rate": 0.875
+  },
+  "sql": {
+    "n": 25,
+    "faithfulness_mean": 4.88,
+    "faithful_rate": 0.96,
+    "correctness": 0.9,
+    "correct_rate": 0.88
+  },
+  "hybrid": {
+    "n": 24,
+    "faithfulness_mean": 3.62,
+    "faithful_rate": 0.542,
+    "correctness": 0.708,
+    "correct_rate": 0.5
+  },
+  "all": {
+    "n": 106,
+    "faithfulness_mean": 4.41,
+    "faithful_rate": 0.802,
+    "correctness": 0.854,
+    "correct_rate": 0.764
+  }
+}
