@@ -61,7 +61,7 @@ async def main():
 
         print("\n--- schedule_post (only creates a pending approval)")
         show(await client.call_tool("schedule_post", {
-            "creator_id": 1, "platform": "Instagram",
+            "creator": "Creator A", "platform": "Instagram",
             "post_datetime": "2030-01-10 18:00", "caption": "New drop! #ad"}))  # fmt: skip
 
 

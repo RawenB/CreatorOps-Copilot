@@ -34,7 +34,7 @@ from creatorops.agent.tools import (
 )
 from creatorops.llm.client import get_llm
 from creatorops.tools.scheduling import decide_approval, propose_schedule_post
-from creatorops.tools.sql import explain_schema
+from creatorops.tools.sql import explain_schema, run_sql
 
 MAX_STEPS = 6
 
@@ -65,13 +65,27 @@ def add_usage(usage: dict, new: dict) -> dict:
     }
 
 
+def lookup_values() -> str:
+    """The small tables (creators, platforms, brands) so the model knows the ids and names."""
+    lines = []
+    for table, id_col in [
+        ("creators", "creator_id"),
+        ("platforms", "platform_id"),
+        ("brands", "brand_id"),
+    ]:
+        rows = run_sql(f"SELECT {id_col}, name FROM {table} ORDER BY {id_col}").get("rows", [])
+        lines.append(f"- {table}: " + ", ".join(f"{i} = {name}" for i, name in rows))
+    return "\n".join(lines)
+
+
 def schema_text() -> str:
     tables = explain_schema()["tables"]
     return SCHEMA_HINT.format(
         tables="\n".join(
             f"- {t}({', '.join(info['columns'])}): {info['description']}"
             for t, info in tables.items()
-        )
+        ),
+        lookups=lookup_values(),
     )
 
 

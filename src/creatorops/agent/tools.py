@@ -75,12 +75,12 @@ TOOL_SCHEMAS = {
         "Schedule a post for a creator. This is a write action: a human must approve it "
         "before anything is scheduled.",
         {
-            "creator_id": {"type": "integer"},
+            "creator": {"type": "string", "description": "Creator name, e.g. 'Creator A'."},
             "platform": {"type": "string", "enum": ["Instagram", "TikTok", "YouTube"]},
             "post_datetime": {"type": "string", "description": "YYYY-MM-DD HH:MM"},
             "caption": {"type": "string"},
         },
-        ["creator_id", "platform", "post_datetime", "caption"],
+        ["creator", "platform", "post_datetime", "caption"],
     ),
 }
 

@@ -44,3 +44,6 @@ app/dist/
 .DS_Store
 .idea/
 .vscode/
+
+# ablation indexes (rebuilt by eval/ablations.py)
+data/ablation/
