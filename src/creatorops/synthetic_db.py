@@ -7,9 +7,10 @@ A few anomalies are planted on purpose so analytics questions are interesting:
 - one viral Reel (creator 3, around 15x the normal reach)
 - a fake-engagement spike: likes but almost no reach (creator 6, 2026-08-12)
 - an August slump for creator 5 (reach about 40% lower)
-- two paid posts without a disclosure label (compliance problem)
+- two paid posts without a disclosure label, both by Creator B (compliance problem)
 """
 
+import json
 import sqlite3
 from datetime import date, datetime, timedelta
 from pathlib import Path
@@ -91,7 +92,8 @@ CREATE TABLE approvals (
     requested_at TEXT NOT NULL,
     decision TEXT,
     decided_at TEXT,
-    decided_by TEXT
+    decided_by TEXT,
+    details TEXT
 );
 CREATE TABLE contracts_index (
     contract_id TEXT PRIMARY KEY,
@@ -386,36 +388,49 @@ def insert_contracts_index(conn, campaigns, rng):
 
 
 def insert_schedule(conn, rng):
-    """A few upcoming posts in the schedule (some already approved)."""
+    """6 posts already approved and scheduled + 4 proposals still waiting for approval.
+
+    A row is only added to `schedule` once its approval is granted. `approvals.details`
+    stores the proposed post as JSON.
+    """
     for i in range(1, 11):
         creator_id = int(rng.integers(1, len(CREATORS) + 1))
         platform_id = int(rng.integers(1, 3))
         when = datetime(2026, 11, 1, 18, 0) + timedelta(days=i * 2)
-        status = "approved" if i <= 6 else "pending"
         created = when - timedelta(days=5)
-        conn.execute(
-            "INSERT INTO schedule VALUES (?, ?, ?, ?, ?, ?, ?)",
-            (
-                i,
-                creator_id,
-                platform_id,
-                when.isoformat(sep=" "),
-                f"Upcoming post #{i}",
-                status,
-                created.isoformat(sep=" "),
-            ),
+        caption = f"Upcoming post #{i}"
+        details = json.dumps(
+            {
+                "creator_id": creator_id,
+                "platform": PLATFORMS[platform_id - 1],
+                "post_datetime": when.isoformat(sep=" ", timespec="minutes"),
+                "caption": caption,
+            }
         )
-        decision = "approved" if status == "approved" else None
-        decided_at = (created + timedelta(hours=3)).isoformat(sep=" ") if decision else None
+        approved = i <= 6
+        if approved:
+            conn.execute(
+                "INSERT INTO schedule VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (
+                    i,
+                    creator_id,
+                    platform_id,
+                    when.isoformat(sep=" "),
+                    caption,
+                    "scheduled",
+                    created.isoformat(sep=" "),
+                ),
+            )
         conn.execute(
-            "INSERT INTO approvals VALUES (?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO approvals VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 i,
-                i,
+                i if approved else None,
                 "schedule_post",
                 created.isoformat(sep=" "),
-                decision,
-                decided_at,
-                "account_manager" if decision else None,
+                "approved" if approved else None,
+                (created + timedelta(hours=3)).isoformat(sep=" ") if approved else None,
+                "account_manager" if approved else None,
+                details,
             ),
         )

@@ -26,7 +26,7 @@ Planted anomalies (so analytics questions have a clear answer):
 1. a viral Reel for Creator C in July 2026 (about 15x the normal reach)
 2. fake engagement for Creator F on 2026-08-12 (likes jump, reach does not)
 3. a slump for Creator E in August 2026 (reach about 40% lower)
-4. two paid Instagram posts without a disclosure label (Creators B and G)
+4. two paid Instagram posts without a disclosure label (both by Creator B)
 
 Limitations: the distributions are simple and only roughly realistic. They are good enough to test SQL and
 hybrid questions, not to draw real marketing conclusions.
