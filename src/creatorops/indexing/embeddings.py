@@ -18,7 +18,7 @@ class Embedder:
 
         self.model_name = model_name
         self.model = SentenceTransformer(model_name)
-        self.dim = self.model.get_sentence_embedding_dimension()
+        self.dim = self.model.get_embedding_dimension()
 
     def embed_documents(self, texts: list[str], batch_size: int = 32) -> np.ndarray:
         return self.model.encode(
