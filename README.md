@@ -18,7 +18,7 @@ End-of-course project, AI Engineering (TEK-UP, ING-4-SDIA). All creator and anal
 |---|---|---|
 | 1 | Setup, corpus + snapshots, synthetic DB, ingestion with versions, dense retrieval | done |
 | 2 | Hybrid search (BM25 + dense) + reranker, tools (policies, contracts, SQL) | done |
-| 3 | LangGraph agent (router, approvals, citations), FastAPI | |
+| 3 | LangGraph agent (router, approvals, citations), FastAPI | done |
 | 4 | MCP server + client demo, React UI | |
 | 5 | Eval set (120+ questions), retrieval / generation / SQL / agent metrics | |
 | 6 | Fine-tuning (clause classifier on Colab), ablations, compliance checker | |
@@ -45,12 +45,21 @@ uv run python scripts/search.py "do I need to label a paid partnership?" --platf
 uv run python scripts/search.py "branded content rules" --platform tiktok --as-of 2024-01-01
 ```
 
+Ask the agent (needs Ollama running):
+
+```bash
+uv run python scripts/ask.py "Is contract C003 exclusive, and what are its payment terms?"
+uv run python scripts/ask.py "Schedule a post for Creator D on Instagram on 2026-12-04 at 18:00"  # asks for approval
+make api   # FastAPI on http://localhost:8000 (docs at /docs)
+```
+
 Commands:
 
 - `make install`: install dependencies
 - `make lint` / `make format`: check / fix code style (ruff)
 - `make test`: run the tests
 - `make db` / `make corpus` / `make ingest`: build the data and the search index
+- `make api`: start the FastAPI backend
 - `make qdrant`: start a Qdrant server with Docker (optional, by default Qdrant runs locally without a server)
 
 ## Project structure
