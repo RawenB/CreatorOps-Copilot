@@ -9,7 +9,7 @@ only look at approvals, not decide them.
 
 from mcp.server.mcpserver import MCPServer
 
-from creatorops.tools import contracts, policies, scheduling, sql
+from creatorops.tools import classify, compliance, contracts, policies, scheduling, sql
 
 mcp = MCPServer("creatorops")
 
@@ -56,12 +56,38 @@ def explain_schema() -> dict:
 
 
 @mcp.tool()
-def schedule_post(creator_id: int, platform: str, post_datetime: str, caption: str) -> dict:
+def check_post_compliance(
+    caption: str,
+    platform: str,
+    is_paid: bool,
+    paid_label_on: bool | None = None,
+    brand_category: str | None = None,
+    age_restricted: bool | None = None,
+) -> dict:
+    """Check a caption before posting: disclosure present, clear and at the start, platform paid label,
+    prohibited categories and age restriction. Every problem cites the rule's source passage.
+
+    is_paid: paid OR gifted (any material connection). brand_category: e.g. alcohol, tobacco, beauty.
+    """
+    return compliance.check_post_compliance(caption, platform, is_paid, paid_label_on, brand_category,
+                                            age_restricted)  # fmt: skip
+
+
+@mcp.tool()
+def classify_clause(text: str) -> dict:
+    """Clause type of a contract passage (fine-tuned classifier): exclusivity, non_compete,
+    term_renewal, termination, ip_license, payment, governing_law, liability or other."""
+    return classify.classify_clause(text)
+
+
+@mcp.tool()
+def schedule_post(creator: str, platform: str, post_datetime: str, caption: str) -> dict:
     """Ask to schedule a post. Nothing is scheduled until a human approves the request.
 
+    creator: the creator's name, e.g. "Creator A".
     platform: Instagram, TikTok or YouTube. post_datetime: "YYYY-MM-DD HH:MM" in the future.
     """
-    result = scheduling.propose_schedule_post(creator_id, platform, post_datetime, caption)
+    result = scheduling.propose_schedule_post(creator, platform, post_datetime, caption)
     if "error" not in result:
         result["note"] = "Waiting for human approval in the CreatorOps UI."
     return result
