@@ -4,15 +4,17 @@
 def matches(
     chunk: dict,
     platform: str | None = None,
-    doc_type: str | None = None,
+    doc_type: str | list[str] | None = None,
     doc_id: str | None = None,
     as_of: str | None = None,
     latest_only: bool = True,
 ) -> bool:
     if platform and chunk.get("platform") not in (platform, "all"):
         return False
-    if doc_type and chunk.get("doc_type") != doc_type:
-        return False
+    if doc_type:
+        allowed = [doc_type] if isinstance(doc_type, str) else doc_type
+        if chunk.get("doc_type") not in allowed:
+            return False
     if doc_id and chunk.get("doc_id") != doc_id:
         return False
     if as_of:
