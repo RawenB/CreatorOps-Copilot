@@ -1,0 +1,279 @@
+{
+  "rules": {
+    "n": 60,
+    "accuracy": 0.883,
+    "non_compliant_precision": 0.816,
+    "non_compliant_recall": 1.0,
+    "non_compliant_f1": 0.899,
+    "reason_exact_match": 0.903,
+    "ms_per_caption": 0.0,
+    "errors": [
+      {
+        "id": "cap_14",
+        "caption": "Thanks to Stride Athletics for the free running shoes! Here's my review",
+        "gold": "compliant",
+        "gold_reasons": [],
+        "pred": "non_compliant",
+        "pred_reasons": [
+          "missing_disclosure"
+        ],
+        "note": "FTC example wording"
+      },
+      {
+        "id": "cap_16",
+        "caption": "#gifted New PJs from Northpeak Apparel",
+        "gold": "compliant",
+        "gold_reasons": [],
+        "pred": "non_compliant",
+        "pred_reasons": [
+          "missing_disclosure"
+        ],
+        "note": "#gifted is a clear term for a gift (ASA)"
+      },
+      {
+        "id": "cap_17",
+        "caption": "#publicité Ma routine beauté avec Lumea Skin",
+        "gold": "compliant",
+        "gold_reasons": [],
+        "pred": "non_compliant",
+        "pred_reasons": [
+          "missing_disclosure"
+        ],
+        "note": "French disclosure, French caption (Creator A / H are FR)"
+      },
+      {
+        "id": "cap_18",
+        "caption": "#publicidad Mis playas favoritas con Wanderly Travel",
+        "gold": "compliant",
+        "gold_reasons": [],
+        "pred": "non_compliant",
+        "pred_reasons": [
+          "missing_disclosure"
+        ],
+        "note": "Spanish disclosure, Spanish caption"
+      },
+      {
+        "id": "cap_19",
+        "caption": "Anzeige: Mein neues Lieblingsspiel von PixelForge",
+        "gold": "compliant",
+        "gold_reasons": [],
+        "pred": "non_compliant",
+        "pred_reasons": [
+          "missing_disclosure"
+        ],
+        "note": "German 'Anzeige' = advertisement"
+      },
+      {
+        "id": "cap_56",
+        "caption": "Our trip with Wanderly Travel (ad) was amazing",
+        "gold": "compliant",
+        "gold_reasons": [],
+        "pred": "non_compliant",
+        "pred_reasons": [
+          "missing_disclosure"
+        ],
+        "note": "(ad) early in a short caption"
+      },
+      {
+        "id": "cap_59",
+        "caption": "Partnered with Lumea Skin for this one ✨",
+        "gold": "compliant",
+        "gold_reasons": [],
+        "pred": "non_compliant",
+        "pred_reasons": [
+          "missing_disclosure"
+        ],
+        "note": "'partnered with <brand>' clearly says there is a partnership (borderline)"
+      }
+    ]
+  },
+  "llm": {
+    "n": 60,
+    "accuracy": 0.733,
+    "non_compliant_precision": 0.778,
+    "non_compliant_recall": 0.677,
+    "non_compliant_f1": 0.724,
+    "reason_exact_match": 0.194,
+    "ms_per_caption": 966.2,
+    "errors": [
+      {
+        "id": "cap_10",
+        "caption": "#ad Gin & tonic with Silverline Spirits, enjoy responsibly",
+        "gold": "compliant",
+        "gold_reasons": [],
+        "pred": "non_compliant",
+        "pred_reasons": [
+          "no_age_restriction"
+        ],
+        "note": "alcohol with age restriction"
+      },
+      {
+        "id": "cap_11",
+        "caption": "Ad: my weekend cocktail with Silverline Spirits",
+        "gold": "compliant",
+        "gold_reasons": [],
+        "pred": "non_compliant",
+        "pred_reasons": [
+          "no_age_restriction"
+        ],
+        "note": "alcohol allowed on TikTok with age limit"
+      },
+      {
+        "id": "cap_12",
+        "caption": "#sponsored Full review of the Orbit Audio headphones",
+        "gold": "compliant",
+        "gold_reasons": [],
+        "pred": "non_compliant",
+        "pred_reasons": [
+          "vague_disclosure"
+        ],
+        "note": ""
+      },
+      {
+        "id": "cap_15",
+        "caption": "Gifted by Wanderly Travel: 3 days in Lisbon",
+        "gold": "compliant",
+        "gold_reasons": [],
+        "pred": "non_compliant",
+        "pred_reasons": [
+          "missing_disclosure",
+          "disclosure_not_at_start"
+        ],
+        "note": ""
+      },
+      {
+        "id": "cap_16",
+        "caption": "#gifted New PJs from Northpeak Apparel",
+        "gold": "compliant",
+        "gold_reasons": [],
+        "pred": "non_compliant",
+        "pred_reasons": [
+          "missing_disclosure",
+          "disclosure_not_at_start"
+        ],
+        "note": "#gifted is a clear term for a gift (ASA)"
+      },
+      {
+        "id": "cap_18",
+        "caption": "#publicidad Mis playas favoritas con Wanderly Travel",
+        "gold": "compliant",
+        "gold_reasons": [],
+        "pred": "non_compliant",
+        "pred_reasons": [
+          "label_off_tiktok"
+        ],
+        "note": "Spanish disclosure, Spanish caption"
+      },
+      {
+        "id": "cap_26",
+        "caption": "New serum is here, obsessed!! Link in bio",
+        "gold": "non_compliant",
+        "gold_reasons": [
+          "missing_disclosure"
+        ],
+        "pred": "compliant",
+        "pred_reasons": [],
+        "note": "paid, no disclosure"
+      },
+      {
+        "id": "cap_27",
+        "caption": "Best headphones I've ever used",
+        "gold": "non_compliant",
+        "gold_reasons": [
+          "missing_disclosure"
+        ],
+        "pred": "compliant",
+        "pred_reasons": [],
+        "note": ""
+      },
+      {
+        "id": "cap_28",
+        "caption": "My honest fitness routine, no filter",
+        "gold": "non_compliant",
+        "gold_reasons": [
+          "missing_disclosure"
+        ],
+        "pred": "compliant",
+        "pred_reasons": [],
+        "note": "Creator B style undisclosed post"
+      },
+      {
+        "id": "cap_34",
+        "caption": "Here is my full morning routine with all the products I use every single day, from cleanser to serum to sunscreen, and honestly my skin has never looked better #ad",
+        "gold": "non_compliant",
+        "gold_reasons": [
+          "disclosure_not_at_start"
+        ],
+        "pred": "compliant",
+        "pred_reasons": [],
+        "note": "#ad at the end of a long caption"
+      },
+      {
+        "id": "cap_35",
+        "caption": "Spent the whole weekend testing every feature of these headphones and comparing them with my old pair, verdict below. Ad",
+        "gold": "non_compliant",
+        "gold_reasons": [
+          "disclosure_not_at_start"
+        ],
+        "pred": "compliant",
+        "pred_reasons": [],
+        "note": ""
+      },
+      {
+        "id": "cap_36",
+        "caption": "New drop! #fashion #ootd #style #ad #streetwear #love",
+        "gold": "non_compliant",
+        "gold_reasons": [
+          "disclosure_in_hashtags"
+        ],
+        "pred": "compliant",
+        "pred_reasons": [],
+        "note": "#ad hidden in hashtag group"
+      },
+      {
+        "id": "cap_47",
+        "caption": "My skin cleared up in 2 weeks with this cream",
+        "gold": "non_compliant",
+        "gold_reasons": [
+          "missing_disclosure"
+        ],
+        "pred": "compliant",
+        "pred_reasons": [],
+        "note": "gifted product, not disclosed"
+      },
+      {
+        "id": "cap_49",
+        "caption": "Check out my new gaming chair, link below #partner",
+        "gold": "non_compliant",
+        "gold_reasons": [
+          "vague_disclosure"
+        ],
+        "pred": "compliant",
+        "pred_reasons": [],
+        "note": ""
+      },
+      {
+        "id": "cap_51",
+        "caption": "I tested 5 protein bars this week and the FitFuel one was my favourite by far, I eat one every day #ad #fitness",
+        "gold": "non_compliant",
+        "gold_reasons": [
+          "disclosure_not_at_start"
+        ],
+        "pred": "compliant",
+        "pred_reasons": [],
+        "note": ""
+      },
+      {
+        "id": "cap_52",
+        "caption": "Late night stream highlights #gaming #twitch #fps #ad",
+        "gold": "non_compliant",
+        "gold_reasons": [
+          "disclosure_in_hashtags"
+        ],
+        "pred": "compliant",
+        "pred_reasons": [],
+        "note": "#ad at the end inside hashtags"
+      }
+    ]
+  }
+}

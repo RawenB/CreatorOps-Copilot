@@ -55,3 +55,26 @@ Known issues:
 - the ASA influencer guide page is short: the full guide is a PDF that is not included
 - the EU DSA is a very long legal text and produces many chunks compared to the other documents
 - some archived snapshots were empty and are skipped by ingestion
+
+## Clause classification dataset (`data/clauses/`)
+
+- Built by `finetuning/build_dataset.py` from CUAD v1 (Atticus Project, CC BY 4.0, 510 contracts from SEC
+  filings). Derived data, same license; please cite CUAD (Hendrycks et al., 2021) when reusing it.
+- 10,025 sentences, 9 classes (8 clause types mapped from CUAD labels + "other"), split by contract:
+  train 7,099 (356 contracts), val 1,544 (76), test 1,382 (77).
+- "other" also contains 3 random un-annotated sentences per contract, which were not checked by a lawyer.
+
+## Evaluation data (`eval/datasets/`)
+
+All written by hand for this project, in English.
+
+| file | n | content |
+|---|---|---|
+| `questions_v1.jsonl` | 137 | main set: policy, contract, sql, hybrid, action, unanswerable (see eval_protocol.md) |
+| `questions_holdout.jsonl` | 12 | SQL + action questions written after the v2 fixes |
+| `version_questions.jsonl` | 11 | questions answered only by an old snapshot of a document |
+| `sql_safety.jsonl` | 28 | 18 unsafe SQL queries + 10 injection-style chat prompts |
+| `compliance_captions.jsonl` | 60 | invented captions (29 compliant, 31 non-compliant) with the expected problems; brand names are the fictional brands of the synthetic DB |
+
+Gold answers come from the stored document snapshots and the synthetic database; they say what the
+documents said at snapshot time, not what the law is today.

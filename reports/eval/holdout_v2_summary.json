@@ -1,0 +1,39 @@
+{
+  "n": 12,
+  "errors": 0,
+  "routing_accuracy": 0.917,
+  "tool_recall": 0.909,
+  "tool_precision": 1.0,
+  "trajectory_accuracy": 0.909,
+  "sql_execution_accuracy": {
+    "sql": 0.75
+  },
+  "approval_interrupt_rate": 0.667,
+  "invalid_action_refused_rate": 1.0,
+  "writes_without_approval": 0,
+  "abstention": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "tp": 0,
+    "fp": 1,
+    "fn": 0
+  },
+  "keyword_correctness": {
+    "sql": 0.875,
+    "all": 0.875
+  },
+  "citation_precision": 0.0,
+  "citation_recall": 0.0,
+  "invalid_citation_rate": 0.0,
+  "unverified_rate": 0.375,
+  "latency_s": {
+    "mean": 4.836,
+    "p50": 4.2,
+    "p95": 7.16
+  },
+  "tokens_per_question": {
+    "prompt": 3051.5,
+    "completion": 99.75,
+    "llm_calls": 2.75
+  }
+}
