@@ -38,13 +38,24 @@ def find_creator(conn, creator) -> tuple | None:
 
 
 def propose_schedule_post(
-    creator, platform: str, post_datetime: str, caption: str, db_path=None
+    creator,
+    platform: str,
+    post_datetime: str,
+    caption: str,
+    link: str | None = None,
+    reference_type: str | None = None,
+    reference_id: str | None = None,
+    created_by: str = "assistant",
+    db_path=None,
 ) -> dict:
-    """Validate a scheduling request and store it as a pending approval.
+    """Validate a scheduling request, store it as a pending approval and open a ticket for it.
 
     creator: the creator's name ("Creator A") or creator_id. The name is resolved here, in code,
     so the LLM never has to guess an id (an unknown name is an error, not a random creator).
+    link / reference: optional, see tickets.py (e.g. a link to the video draft, contract C003).
     """
+    from creatorops.tools import tickets
+
     platform = (
         platform.strip().capitalize().replace("Tiktok", "TikTok").replace("Youtube", "YouTube")
     )
@@ -58,12 +69,18 @@ def propose_schedule_post(
         return {"error": f"{when} is in the past, a post can only be scheduled in the future."}
     if not caption.strip():
         return {"error": "The caption is empty."}
+    if error := tickets.check_link(link):
+        return {"error": error}
 
-    conn = connect(db_path)
+    conn = tickets.connect(db_path)  # same database, makes sure the tickets table exists
     found = find_creator(conn, creator)
     if found is None:
         conn.close()
         return {"error": f"Unknown creator {creator!r}. Use a name from the creators table."}
+    reference = tickets.resolve_reference(conn, reference_type, reference_id)
+    if "error" in reference:
+        conn.close()
+        return reference
 
     details = {
         "creator_id": found[0],
@@ -71,14 +88,25 @@ def propose_schedule_post(
         "platform": platform,
         "post_datetime": when.isoformat(sep=" ", timespec="minutes"),
         "caption": caption.strip(),
+        "link": (link or "").strip() or None,
+        "reference": reference.get("label"),
     }
     cursor = conn.execute(
         "INSERT INTO approvals (schedule_id, action, requested_at, details) VALUES (NULL, ?, ?, ?)",
         ("schedule_post", now(), json.dumps(details)),
     )
+    approval_id = cursor.lastrowid
+    title = f"Post for {found[1]} on {platform}, {details['post_datetime']}"
+    ticket_id = tickets.insert_ticket(conn, "post_request", title, created_by, caption.strip(),
+                                      "pending", "medium", None, link, reference, approval_id)  # fmt: skip
+    details["ticket_id"] = ticket_id
+    details["ticket"] = tickets.code(ticket_id)
+    conn.execute(
+        "UPDATE approvals SET details = ? WHERE approval_id = ?", (json.dumps(details), approval_id)
+    )
     conn.commit()
     conn.close()
-    return {"approval_id": cursor.lastrowid, "status": "pending_approval", **details}
+    return {"approval_id": approval_id, "status": "pending_approval", **details}
 
 
 def decide_approval(approval_id: int, approved: bool, decided_by: str = "user", db_path=None):
