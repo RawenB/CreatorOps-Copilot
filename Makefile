@@ -26,7 +26,10 @@ ingest:
 api:
 	uv run uvicorn creatorops.api.main:app --reload --port 8000
 
+mcp:
+	HF_HUB_OFFLINE=1 uv run python -m creatorops.mcp_server.server
+
 qdrant:
 	docker compose up -d qdrant
 
-.PHONY: install lint format test check db corpus ingest api qdrant
+.PHONY: install lint format test check db corpus ingest api mcp qdrant
