@@ -66,3 +66,7 @@ def test_creator_can_be_given_by_name(db):
     result = propose_schedule_post("creator c", "Instagram", "2030-01-04 18:00", "Hi", db_path=db)
     assert result["creator_id"] == 3
     assert result["creator_name"] == "Creator C"
+
+
+def test_list_approvals_always_has_the_creator_name(db):
+    assert all(a["creator_name"].startswith("Creator") for a in list_approvals("all", db_path=db))

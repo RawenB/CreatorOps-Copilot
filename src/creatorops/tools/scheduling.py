@@ -135,6 +135,14 @@ def list_approvals(status: str = "pending", db_path=None) -> list[dict]:
     elif status in ("approved", "rejected"):
         query += f" WHERE decision = '{status}'"
     rows = conn.execute(query + " ORDER BY approval_id DESC").fetchall()
+    names = dict(conn.execute("SELECT creator_id, name FROM creators").fetchall())
     conn.close()
     keys = ["approval_id", "action", "requested_at", "decision", "decided_at", "decided_by"]
-    return [{**dict(zip(keys, r[:6])), **json.loads(r[6] or "{}")} for r in rows]
+    result = []
+    for r in rows:
+        item = {**dict(zip(keys, r[:6])), **json.loads(r[6] or "{}")}
+        # older requests (seeded data) only stored the creator_id
+        if "creator_name" not in item and item.get("creator_id") in names:
+            item["creator_name"] = names[item["creator_id"]]
+        result.append(item)
+    return result

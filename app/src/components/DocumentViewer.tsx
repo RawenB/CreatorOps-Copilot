@@ -1,37 +1,51 @@
 import { useEffect, useRef, useState } from 'react'
 import { api, type DocSource, type DocumentText } from '../api'
+import { DocText } from '../markdown'
+import { CloseIcon, ExternalIcon } from './Icons'
 
 // Full text of the cited document version, with the cited passage highlighted.
+// The other stored versions can be opened too (no highlight there).
 export default function DocumentViewer({ source, onClose }: { source: DocSource; onClose: () => void }) {
+  const [version, setVersion] = useState<number | null>(source.version)
   const [doc, setDoc] = useState<DocumentText | null>(null)
   const [error, setError] = useState('')
   const markRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
+    setDoc(null)
     api
-      .document(source.doc_id, source.version)
+      .document(source.doc_id, version)
       .then(setDoc)
       .catch((e) => setError(e.message))
-  }, [source])
+  }, [source, version])
 
   useEffect(() => {
     markRef.current?.scrollIntoView({ block: 'center' })
   }, [doc])
 
-  let body = null
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  let body: React.ReactNode = null
   if (doc) {
     const start = source.char_start ?? -1
     const end = source.char_end ?? -1
-    if (start >= 0 && end > start && end <= doc.text.length) {
+    const sameVersion = doc.version === source.version
+    if (sameVersion && start >= 0 && end > start && end <= doc.text.length) {
       body = (
         <>
-          {doc.text.slice(0, start)}
-          <mark ref={markRef}>{doc.text.slice(start, end)}</mark>
-          {doc.text.slice(end)}
+          <DocText text={doc.text.slice(0, start)} />
+          <mark ref={markRef}>
+            <DocText text={doc.text.slice(start, end)} />
+          </mark>
+          <DocText text={doc.text.slice(end)} />
         </>
       )
     } else {
-      body = doc.text
+      body = <DocText text={doc.text} />
     }
   }
 
@@ -40,23 +54,37 @@ export default function DocumentViewer({ source, onClose }: { source: DocSource;
       <div className="viewer" onClick={(e) => e.stopPropagation()}>
         <div className="viewer-head">
           <div>
-            <b>{source.title}</b>
-            <div className="meta">
-              version {source.version} · snapshot {source.snapshot_date}
-              {doc && doc.versions.length > 1 && ` · ${doc.versions.length} versions stored`}
-              {source.synthetic && ' · synthetic document'}
+            <h3>{source.title}</h3>
+            <div className="source-meta">
+              {doc?.synthetic && <span>synthetic document</span>}
+              {source.source_url && (
+                <a href={source.source_url} target="_blank" rel="noreferrer">
+                  original page <ExternalIcon size={12} />
+                </a>
+              )}
             </div>
-            {source.source_url && (
-              <a href={source.source_url} target="_blank" rel="noreferrer">
-                original source
-              </a>
-            )}
           </div>
-          <button onClick={onClose}>Close</button>
+          <button className="icon-button" onClick={onClose} title="Close (Esc)">
+            <CloseIcon />
+          </button>
         </div>
-        {error && <div className="error">{error}</div>}
-        {!doc && !error && <div className="meta">Loading...</div>}
-        <pre className="doc-text">{body}</pre>
+
+        {doc && doc.versions.length > 1 && (
+          <div className="versions">
+            <span className="muted">Stored versions:</span>
+            {doc.versions.map((v) => (
+              <button key={v.version} className={'pill' + (v.version === doc.version ? ' on' : '')} onClick={() => setVersion(v.version)}>
+                v{v.version} · {v.snapshot_date}
+                {v.is_latest && ' (latest)'}
+                {v.version === source.version && ' · cited'}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {error && <div className="notice error">{error}</div>}
+        {!doc && !error && <div className="empty">Loading the document...</div>}
+        {doc && <pre className="doc-text">{body}</pre>}
       </div>
     </div>
   )
