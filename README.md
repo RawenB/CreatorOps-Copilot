@@ -60,6 +60,7 @@ Commands:
 - `make test`: run the tests
 - `make db` / `make corpus` / `make ingest`: build the data and the search index
 - `make api`: start the FastAPI backend
+- `make mcp`: start the MCP server (stdio), see [docs/mcp.md](docs/mcp.md) for the Claude Desktop config
 - `make qdrant`: start a Qdrant server with Docker (optional, by default Qdrant runs locally without a server)
 
 ## Project structure
@@ -75,4 +76,4 @@ docs/             architecture and decisions
 reports/          results
 ```
 
-See [docs/architecture.md](docs/architecture.md) and [docs/decisions.md](docs/decisions.md).
+See [docs/architecture.md](docs/architecture.md), [docs/decisions.md](docs/decisions.md) and [docs/mcp.md](docs/mcp.md).

@@ -126,3 +126,9 @@ integer division (engagement rate 0.0), and once inventing "12.5%" from an empty
 now includes join keys, allowed values and the engagement-rate formula, one example engagement-rate query is
 in the prompt, and empty SQL results are shown as "0 rows". Because the example query is close to some
 analytics questions, the eval set must not reuse it word for word (noted in the eval protocol).
+
+## 24. MCP server reuses the same tool functions, without an approve tool
+The MCP server is a thin layer (MCPServer from the official `mcp` SDK, stdio) over the functions in
+`creatorops.tools`, so the agent, the API and MCP clients always behave the same. `schedule_post` only creates
+a pending approval and no MCP tool can approve it: the human-in-the-loop rule also holds when another LLM
+(Claude Desktop, Cursor...) is the caller. Tools return plain dicts; the SDK sends them as JSON text.
