@@ -49,16 +49,26 @@ def main():
     rows = [json.loads(line) for line in (RUNS / f"{args.run}.jsonl").read_text().splitlines()]
     rows = [r for r in rows if r["type"] in TYPES and r["answer"] and not r["abstained"]]
 
-    llm = get_llm()
-    for i, row in enumerate(rows, 1):
-        item = items[row["id"]]
-        row.update(judge(llm, item["question"], item["reference_answer"], row["answer"],
-                         sources_text(row)))  # fmt: skip
-        print(f"[{i}/{len(rows)}] {row['id']} faithfulness={row['faithfulness']} "
-              f"correctness={row['correctness']}", flush=True)  # fmt: skip
-
+    # judged rows are saved one by one, so a crash (e.g. Ollama restarting) can be resumed
     out = RUNS / f"generation_{args.run}"
-    Path(f"{out}.jsonl").write_text("\n".join(json.dumps(r, ensure_ascii=False) for r in rows))
+    done = {}
+    if Path(f"{out}.jsonl").exists():
+        for line in Path(f"{out}.jsonl").read_text().splitlines():
+            done[json.loads(line)["id"]] = json.loads(line)
+    llm = get_llm()
+    with open(f"{out}.jsonl", "a") as f:
+        for i, row in enumerate(rows, 1):
+            if row["id"] in done:
+                continue
+            item = items[row["id"]]
+            row.update(judge(llm, item["question"], item["reference_answer"], row["answer"],
+                             sources_text(row)))  # fmt: skip
+            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+            f.flush()
+            done[row["id"]] = row
+            print(f"[{i}/{len(rows)}] {row['id']} faithfulness={row['faithfulness']} "
+                  f"correctness={row['correctness']}", flush=True)  # fmt: skip
+    rows = [done[r["id"]] for r in rows]
     summary = summarize(rows)
     Path(f"{out}_summary.json").write_text(json.dumps(summary, indent=2))
     print(json.dumps(summary, indent=2))
