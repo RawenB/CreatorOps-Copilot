@@ -19,7 +19,7 @@ End-of-course project, AI Engineering (TEK-UP, ING-4-SDIA). All creator and anal
 | 1 | Setup, corpus + snapshots, synthetic DB, ingestion with versions, dense retrieval | done |
 | 2 | Hybrid search (BM25 + dense) + reranker, tools (policies, contracts, SQL) | done |
 | 3 | LangGraph agent (router, approvals, citations), FastAPI | done |
-| 4 | MCP server + client demo, React UI | |
+| 4 | MCP server + client demo, React UI | done |
 | 5 | Eval set (120+ questions), retrieval / generation / SQL / agent metrics | |
 | 6 | Fine-tuning (clause classifier on Colab), ablations, compliance checker | |
 | 7 | Error analysis, report notes, demo | |
