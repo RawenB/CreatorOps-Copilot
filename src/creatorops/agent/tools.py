@@ -4,6 +4,8 @@ Every result that can be cited gets a number [n]. The LLM must cite these number
 citations.py checks that every number in the answer really exists.
 """
 
+from creatorops.tools.classify import classify_clause
+from creatorops.tools.compliance import check_post_compliance
 from creatorops.tools.contracts import CLAUSE_QUERIES, find_clause
 from creatorops.tools.policies import compare_policy_versions, search_policies
 from creatorops.tools.sql import explain_schema, run_sql
@@ -70,6 +72,33 @@ TOOL_SCHEMAS = {
     "explain_schema": schema(
         "explain_schema", "List the tables and columns of the analytics database.", {}, []
     ),
+    "check_post_compliance": schema(
+        "check_post_compliance",
+        "Check a caption before it is posted: disclosure (#ad...) present, clear and at the start, platform "
+        "paid-partnership label, prohibited categories, age restriction. Returns a verdict and the rules.",
+        {
+            "caption": {"type": "string"},
+            "platform": {"type": "string", "enum": ["instagram", "tiktok", "youtube"]},
+            "is_paid": {"type": "boolean", "description": "Paid OR gifted by a brand."},
+            "paid_label_on": {
+                "type": "boolean",
+                "description": "Platform paid label switched on (if known).",
+            },
+            "brand_category": {
+                "type": "string",
+                "description": "e.g. alcohol, tobacco, weight_loss, beauty.",
+            },
+            "age_restricted": {"type": "boolean", "description": "Age restriction set (if known)."},
+        },  # fmt: skip
+        ["caption", "platform", "is_paid"],
+    ),
+    "classify_clause": schema(
+        "classify_clause",
+        "Classify a contract passage given by the user (exclusivity, non_compete, term_renewal, termination, "
+        "ip_license, payment, governing_law, liability, other).",
+        {"text": {"type": "string", "description": "The clause text."}},
+        ["text"],
+    ),
     "schedule_post": schema(
         "schedule_post",
         "Schedule a post for a creator. This is a write action: a human must approve it "
@@ -90,6 +119,8 @@ READ_TOOLS = {
     "find_clause": find_clause,
     "run_sql": run_sql,
     "explain_schema": explain_schema,
+    "check_post_compliance": check_post_compliance,
+    "classify_clause": classify_clause,
 }
 
 WRITE_TOOLS = {"schedule_post"}
@@ -119,6 +150,14 @@ def result_to_sources(name: str, result: dict, start_n: int) -> list[dict]:
                         "rows": result["rows"], "truncated": result["truncated"]})  # fmt: skip
     elif name == "compare_policy_versions":
         sources.append({"kind": "comparison", **result})
+    elif name == "check_post_compliance":
+        sources.append(
+            {"kind": "compliance", "verdict": result["verdict"], "problems": result["problems"]}
+        )
+        for s in result.get("sources", []):  # the rule passages, citable like documents
+            sources.append({**s, "kind": "document"})
+    elif name == "classify_clause":
+        sources.append({"kind": "classification", **result})
     for i, s in enumerate(sources):
         s["n"] = start_n + i
     return sources
@@ -163,4 +202,11 @@ def format_for_llm(name: str, result: dict, sources: list[dict]) -> str:
                 detail = c.get("diff") or [c.get("new_text") or c.get("old_text")]
                 lines.append(f"- {c['change']}: {c['section']}\n  " + "\n  ".join(detail)[:700])
             parts.append("\n".join(lines))
+        elif s["kind"] == "compliance":
+            problems = (
+                "\n".join(f"- {p['rule']}: {p['message']}" for p in s["problems"]) or "- none"
+            )
+            parts.append(f"[{s['n']}] Compliance check: {s['verdict']}\nproblems:\n{problems}")
+        elif s["kind"] == "classification":
+            parts.append(f"[{s['n']}] Clause classifier: {s['label']} (scores {s['scores']})")
     return "\n\n".join(parts)
