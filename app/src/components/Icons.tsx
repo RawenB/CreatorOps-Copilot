@@ -92,3 +92,17 @@ export const ExternalIcon = (p: Props) => (
     <path d="M15 3h6v6M10 14L21 3" />
   </Svg>
 )
+
+export const TicketIcon = (p: Props) => (
+  <Svg {...p}>
+    <path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3a2 2 0 0 0 0 4v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 0 0-4z" />
+    <path d="M13 5v2M13 17v2M13 11v2" />
+  </Svg>
+)
+
+export const ChartIcon = (p: Props) => (
+  <Svg {...p}>
+    <path d="M3 3v18h18" />
+    <path d="M7 15l4-4 3 3 5-6" />
+  </Svg>
+)

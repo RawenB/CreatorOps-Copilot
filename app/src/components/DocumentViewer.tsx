@@ -12,7 +12,6 @@ export default function DocumentViewer({ source, onClose }: { source: DocSource;
   const markRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
-    setDoc(null)
     api
       .document(source.doc_id, version)
       .then(setDoc)
@@ -83,8 +82,8 @@ export default function DocumentViewer({ source, onClose }: { source: DocSource;
         )}
 
         {error && <div className="notice error">{error}</div>}
-        {!doc && !error && <div className="empty">Loading the document...</div>}
-        {doc && <pre className="doc-text">{body}</pre>}
+        {(!doc || (version !== null && doc.version !== version)) && !error && <div className="empty">Loading the document...</div>}
+        {doc && (version === null || doc.version === version) && <pre className="doc-text">{body}</pre>}
       </div>
     </div>
   )

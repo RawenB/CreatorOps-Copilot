@@ -16,9 +16,14 @@ const EXAMPLES = [
   { tag: 'Analytics', text: 'Which creator had the highest engagement rate on Instagram Reels in July 2026?' },
   { tag: 'Compliance', text: "Is this caption ok for a paid Instagram post: 'New drop! #fashion #ootd #style #ad #streetwear'" },
   { tag: 'Action', text: "Schedule an Instagram post for Creator A on 2027-03-05 18:00 with the caption 'Spring looks #ad'" },
+  { tag: 'Ticket', text: 'Create a high priority ticket to add a disclosure to post 166' },
+  { tag: 'Analytics + SOP', text: 'Creator F got a huge number of likes on 2026-08-12. What does our reporting SOP say about it?' },
 ]
 
-export default function Chat({ onApprovalChange }: { onApprovalChange: () => void }) {
+export default function Chat({ onApprovalChange, onOpenTicket }: {
+  onApprovalChange: () => void
+  onOpenTicket: (id: number) => void
+}) {
   const [turns, setTurns] = useState<Turn[]>([])
   const [question, setQuestion] = useState('')
   const [loading, setLoading] = useState(false)
@@ -53,7 +58,8 @@ export default function Chat({ onApprovalChange }: { onApprovalChange: () => voi
       setTurns((t) => t.map((turn, i) => (i === index ? { ...turn, result } : turn)))
       setActive(index)
       setCited(result.citations[0] ?? null)
-      if (result.status === 'waiting_approval') onApprovalChange()
+      // a new approval request or a new ticket: refresh the badges
+      if (result.status === 'waiting_approval' || result.sources.some((s) => s.kind === 'ticket')) onApprovalChange()
     } catch (e) {
       const error = (e as Error).message
       setTurns((t) => t.map((turn, i) => (i === index ? { ...turn, error } : turn)))
@@ -132,6 +138,7 @@ export default function Chat({ onApprovalChange }: { onApprovalChange: () => voi
                       <p className="approval-intro">I prepared this action. A human has to approve it before anything is scheduled:</p>
                       <ApprovalCard
                         approval={turn.result.pending_approval}
+                        onOpenTicket={onOpenTicket}
                         busy={loading}
                         onDecide={(ok) => decide(i, turn.result!.pending_approval!.approval_id, ok)}
                       />
@@ -139,7 +146,7 @@ export default function Chat({ onApprovalChange }: { onApprovalChange: () => voi
                   )}
                   {turn.result?.status === 'done' && turn.result.approval?.decision && (
                     <div className="decided">
-                      <ApprovalCard approval={turn.result.approval} />
+                      <ApprovalCard approval={turn.result.approval} onOpenTicket={onOpenTicket} />
                     </div>
                   )}
                   {turn.result?.status === 'done' && (
@@ -192,10 +199,13 @@ export default function Chat({ onApprovalChange }: { onApprovalChange: () => voi
           <SourceCard
             key={s.n}
             source={s}
-            cited={Boolean(activeResult?.citations.includes(s.n))}
+            cited={s.kind === 'ticket' || Boolean(activeResult?.citations.includes(s.n))}
             selected={s.n === cited}
             onSelect={() => setCited(s.n)}
-            onOpen={() => s.kind === 'document' && setOpenDoc(s)}
+            onOpen={() => {
+              if (s.kind === 'document') setOpenDoc(s)
+              if (s.kind === 'ticket') onOpenTicket(s.ticket_id)
+            }}
           />
         ))}
       </aside>

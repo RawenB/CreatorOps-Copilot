@@ -41,7 +41,8 @@
 | `classify_clause(text)` | contract, hybrid | no | clause type from the fine-tuned ModernBERT |
 | `run_sql(query)` / `explain_schema()` | sql, contract, hybrid, action | no | rows / schema (read-only, allowlist, timeout) |
 | `check_post_compliance(caption, platform, is_paid, ...)` | policy, hybrid, action | no | verdict + problems + cited rule passages |
-| `schedule_post(creator, platform, post_datetime, caption)` | action | approvals only | pending approval, the graph stops until a human decides |
+| `create_ticket(title, priority?, reference_type?, reference_id?, link?)` | action, hybrid | tickets only | a task ticket `TCK-...` (internal to-do, no approval needed) |
+| `schedule_post(creator, platform, post_datetime, caption, link?, reference?)` | action | approvals + tickets | pending approval + post-request ticket, the graph stops until a human decides |
 
 ## Evaluation
 
@@ -74,6 +75,8 @@ snapshot_date, version, is_latest, source_url, synthetic, content_hash, ingested
 | `GET /schedule` | scheduled posts (calendar) |
 | `POST /sql`, `GET /schema` | read-only SQL panel |
 | `POST /search` | hybrid search with filters |
+| `GET/POST /tickets`, `GET/PATCH /tickets/{id}` | list, create (task or post request), read, update a ticket |
+| `GET /analytics?platform=` | KPIs, monthly series, formats, creators and anomalies for the Analytics page |
 | `GET /documents/{doc_id}?version=` | full text of a document version + list of versions, to highlight a cited passage with `char_start` / `char_end` |
 
 ## React UI (`app/`, `make ui`)

@@ -169,3 +169,20 @@ the input. The split is by contract so the test contracts are never seen. Modern
 fine-tuned locally on the Apple GPU (MPS, ~25 min); the same code runs on Colab
 (`finetuning/notebooks/train_colab.ipynb`). Baselines: zero-shot qwen3:8b and the frozen encoder with a
 logistic regression head. MLflow logs go to `./mlruns` (file store, no server).
+
+## 31. Tickets: one list for tasks and post requests, references checked in code
+A ticket has an id (`TCK-0007`), a link (any http(s) URL) and a reference to something that exists in the
+data (contract, campaign, post, creator or policy document); the reference is resolved when the ticket is
+created, so it can never point to nothing, and a contract / policy reference opens in the document viewer.
+Every scheduling request (UI form, agent, MCP) creates a post-request ticket in the same transaction as the
+approval; its status is read from the approval, so it cannot be closed without a human decision. Creating a
+task is not an external action, so the assistant can do it without approval (it is recorded as
+`created_by = assistant`). Tickets live in the same SQLite file but are not in the SQL tool allowlist.
+
+## 32. Analytics page on the synthetic data, anomalies by simple rules
+The analytics stay on the generated database (real platform APIs need business accounts and app review).
+The page says so in a banner. The "things to check" are four plain rules (undisclosed paid post,
+likes / reach ratio > 4x the creator's usual with likes > 5x a normal day, post reach > 5x the creator's
+median, month-to-month reach drop > 25%). The first version compared likes and reach separately and
+missed the planted fake-likes day (its reach was a bit above the threshold); the ratio finds exactly it.
+Charts are hand-written SVG (one series each, single validated color, hover tooltips, table view).

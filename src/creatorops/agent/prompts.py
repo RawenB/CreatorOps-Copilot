@@ -9,7 +9,7 @@ Routes:
 - "contract": what a brand or talent contract says (exclusivity, payment, termination, usage rights...).
 - "sql": numbers about the agency's creators, posts, metrics, campaigns, brands or schedule.
 - "hybrid": needs numbers from the database AND rules or contract text to answer.
-- "action": the user asks to DO something, like scheduling a post.
+- "action": the user asks to DO something, like scheduling a post or creating a ticket / task.
 - "out_of_scope": anything unrelated to the agency's work (general knowledge, coding, weather...).
 
 Examples:
@@ -20,6 +20,7 @@ Examples:
 "Creator B works with an alcohol brand: what does their contract say and what do Meta ad rules require?" -> {"route": "hybrid"}
 "Creator D's reach dropped in June: what does our reporting SOP say about it?" -> {"route": "hybrid"}
 "Schedule this caption for Creator A on Instagram on Friday at 18:00" -> {"route": "action"}
+"Create a ticket to fix the disclosure of post 166" -> {"route": "action"}
 "What's the capital of Australia?" -> {"route": "out_of_scope"}
 """
 
@@ -42,7 +43,9 @@ Rules:
    JOIN accounts a ON a.account_id = p.account_id JOIN creators c ON c.creator_id = a.creator_id
    WHERE p.format = 'reel' AND p.posted_at LIKE '2026-07%' GROUP BY c.name ORDER BY engagement_rate DESC
 6. To check if a caption can be posted, call check_post_compliance and cite its result.
-7. To schedule a post, call schedule_post. It will NOT be scheduled until a human approves it, so never
+7. To create a task for the team, call create_ticket (with a reference when it is about a contract, post,
+   campaign, creator or policy) and give the ticket code (TCK-...) in the answer.
+8. To schedule a post, call schedule_post. It will NOT be scheduled until a human approves it, so never
    say it is scheduled unless the tool result says the approval was granted.
 
 Question type: {route}.

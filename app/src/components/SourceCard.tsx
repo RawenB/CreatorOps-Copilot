@@ -16,6 +16,7 @@ function tagOf(source: Source): { label: string; className: string } {
   if (source.kind === 'sql') return { label: 'SQL', className: 'sql' }
   if (source.kind === 'comparison') return { label: 'Version diff', className: 'diff' }
   if (source.kind === 'compliance') return { label: 'Compliance', className: 'compliance' }
+  if (source.kind === 'ticket') return { label: 'Ticket created', className: 'ticket' }
   return { label: 'Classifier', className: 'classifier' }
 }
 
@@ -122,6 +123,24 @@ export default function SourceCard({ source, cited, selected, onSelect, onOpen }
               ))}
             </ul>
           )}
+        </>
+      )}
+
+      {source.kind === 'ticket' && (
+        <>
+          <div className="source-title">
+            <span className="mono">{source.code}</span> {source.title}
+          </div>
+          <div className="source-meta">
+            <span>priority {source.priority}</span>
+            {source.reference_label && <span>ref: {source.reference_label}</span>}
+          </div>
+          <div className="source-actions">
+            <span />
+            <button className="link" onClick={(e) => { e.stopPropagation(); onOpen() }}>
+              Open ticket
+            </button>
+          </div>
         </>
       )}
 

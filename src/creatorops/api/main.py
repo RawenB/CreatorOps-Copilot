@@ -13,8 +13,10 @@ from pydantic import BaseModel
 from creatorops.agent.graph import Copilot
 from creatorops.config import settings
 from creatorops.ingestion.parsers import parse_file
+from creatorops.tools import tickets
+from creatorops.tools.analytics import dashboard
 from creatorops.tools.common import get_registry, get_retriever, to_source
-from creatorops.tools.scheduling import decide_approval, list_approvals
+from creatorops.tools.scheduling import decide_approval, list_approvals, propose_schedule_post
 from creatorops.tools.sql import explain_schema, run_sql
 
 
@@ -30,6 +32,27 @@ class Decision(BaseModel):
 
 class SqlRequest(BaseModel):
     query: str
+
+
+class TicketRequest(BaseModel):
+    kind: str = "task"  # "task" or "post_request"
+    title: str | None = None  # task
+    description: str | None = None
+    priority: str = "medium"
+    assignee: str | None = None
+    link: str | None = None
+    reference_type: str | None = None
+    reference_id: str | None = None
+    creator: str | None = None  # post_request
+    platform: str | None = None
+    post_datetime: str | None = None
+    caption: str | None = None
+
+
+class TicketUpdate(BaseModel):
+    status: str | None = None
+    priority: str | None = None
+    assignee: str | None = None
 
 
 class SearchRequest(BaseModel):
@@ -82,6 +105,58 @@ def create_app(copilot: Copilot | None = None) -> FastAPI:
         if "error" in result:
             raise HTTPException(400, result["error"])
         return {"status": "done", "approval": result}
+
+    @app.get("/tickets")
+    def list_all_tickets(kind: str | None = None, status: str | None = None):
+        return tickets.list_tickets(kind, status)
+
+    @app.get("/tickets/{ticket_id}")
+    def one_ticket(ticket_id: int):
+        ticket = tickets.get_ticket(ticket_id)
+        if "error" in ticket:
+            raise HTTPException(404, ticket["error"])
+        return ticket
+
+    @app.post("/tickets")
+    def new_ticket(request: TicketRequest):
+        """A task, or a post request (which also creates the approval request)."""
+        if request.kind == "post_request":
+            if not all([request.creator, request.platform, request.post_datetime, request.caption]):
+                raise HTTPException(
+                    400, "creator, platform, post_datetime and caption are required"
+                )
+            result = propose_schedule_post(request.creator, request.platform, request.post_datetime,
+                                           request.caption, request.link, request.reference_type,
+                                           request.reference_id, created_by="user")  # fmt: skip
+            if "error" in result:
+                raise HTTPException(400, result["error"])
+            return tickets.get_ticket(result["ticket_id"])
+        if request.kind != "task":
+            raise HTTPException(400, "kind must be 'task' or 'post_request'")
+        result = tickets.create_task(request.title or "", request.description, request.priority,
+                                     request.assignee, request.link, request.reference_type,
+                                     request.reference_id, created_by="user")  # fmt: skip
+        if "error" in result:
+            raise HTTPException(400, result["error"])
+        return result
+
+    @app.patch("/tickets/{ticket_id}")
+    def change_ticket(ticket_id: int, update: TicketUpdate):
+        result = tickets.update_ticket(ticket_id, update.status, update.priority, update.assignee)
+        if "error" in result:
+            raise HTTPException(400, result["error"])
+        return result
+
+    @app.get("/analytics")
+    def analytics(platform: str | None = None):
+        return dashboard(platform)
+
+    @app.get("/creators")
+    def creators():
+        """Names for the forms (creator picker)."""
+        return run_sql("SELECT creator_id, name, niche, country FROM creators ORDER BY creator_id")[
+            "rows"
+        ]
 
     @app.get("/schedule")
     def schedule():
