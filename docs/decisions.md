@@ -140,3 +140,32 @@ cross-origin calls in dev (CORS is still configured for direct calls). Each chat
 agent thread: questions are independent, and it keeps the evaluation and the UI behaving the same.
 Citations link to the exact passage in the stored version of the document (not the live page), so what
 the user checks is what the model read.
+
+## 26. SQL prompt includes the lookup values
+The first full eval run showed the model comparing id columns with names (`platform_id = 'Instagram'`),
+which returns 0 rows without an error. The creators / platforms / brands tables are tiny, so their ids
+and names are now in the prompt, with the join path posts -> accounts -> creators. SQL execution accuracy
+went from 33% to 59% (75% on held-out questions written after the change). See docs/error_analysis.md.
+
+## 27. schedule_post takes a creator name, resolved in code
+The model invented `creator_id=1` for an unknown creator. Resolving the name in Python makes the mistake
+impossible (unknown name = error) and the approval card always shows the creator that will really be used.
+
+## 28. Two eval runs (v1, v2) + a held-out set
+Fixes 26 and 27 come from reading the v1 errors on the test questions, so v2 is partly tuned on the test
+set. To check that the fixes generalize, 12 new questions (8 SQL, 4 actions) were written after the fixes
+(`eval/datasets/questions_holdout.jsonl`). Both runs are reported. No other changes were made after the
+v2 run, the remaining errors are described instead of fixed.
+
+## 29. Compliance checker = deterministic rules with cited passages
+`check_post_compliance` is plain Python rules (disclosure present / clear / at the start / not in a hashtag
+group, platform label, TikTok prohibited categories, age restriction). Every rule points to an exact
+passage of the stored corpus, so the verdict is explainable and the UI can highlight the source. An LLM
+baseline with the same rule texts is evaluated next to it on 60 hand-labelled captions.
+
+## 30. Clause classifier: ModernBERT-base, split by contract, trained on the Mac GPU
+CUAD's 41 labels are mapped to 8 agency clause types + "other"; the sentence around each annotated span is
+the input. The split is by contract so the test contracts are never seen. ModernBERT-base (149M) was
+fine-tuned locally on the Apple GPU (MPS, ~25 min); the same code runs on Colab
+(`finetuning/notebooks/train_colab.ipynb`). Baselines: zero-shot qwen3:8b and the frozen encoder with a
+logistic regression head. MLflow logs go to `./mlruns` (file store, no server).

@@ -25,10 +25,30 @@
 | `indexing` | embeddings, Qdrant collection, BM25 index |
 | `retrieval` | hybrid search, filters, reranker |
 | `llm` | client for Ollama (+ a fake one for tests) |
-| `tools` | policy search, clause search, SQL, compliance check, scheduling |
+| `tools` | policy search + version diff, clause search, clause classifier, SQL, compliance check, scheduling |
 | `agent` | LangGraph graph: router, tools, approval step, citation check |
 | `api` | FastAPI endpoints used by the UI |
 | `mcp_server` | MCP server with the same tools |
+| `evaluation` | dataset loading, metrics, LLM judge (scripts in `eval/`) |
+
+## Tools
+
+| Tool | Routes | Writes? | What it returns |
+|---|---|---|---|
+| `search_policies(query, platform?, as_of?)` | policy, hybrid | no | passages with title, section, snapshot date, version |
+| `compare_policy_versions(topic, platform?)` | policy, hybrid | no | changed sections between the 2 latest versions |
+| `find_clause(clause_type, contract_id?, query?)` | contract, hybrid | no | contract passages (filtered on the contract if given) |
+| `classify_clause(text)` | contract, hybrid | no | clause type from the fine-tuned ModernBERT |
+| `run_sql(query)` / `explain_schema()` | sql, contract, hybrid, action | no | rows / schema (read-only, allowlist, timeout) |
+| `check_post_compliance(caption, platform, is_paid, ...)` | policy, hybrid, action | no | verdict + problems + cited rule passages |
+| `schedule_post(creator, platform, post_datetime, caption)` | action | approvals only | pending approval, the graph stops until a human decides |
+
+## Evaluation
+
+`eval/` (datasets + scripts) and `src/creatorops/evaluation/` (metrics, judge). `make eval` runs: dataset
+check, retrieval benchmark, full agent run, LLM judge, SQL safety, then writes `reports/eval_results.md`.
+Separate: `eval/run_compliance_eval.py`, `eval/ablations.py`, `finetuning/evaluate.py`.
+See [eval_protocol.md](eval_protocol.md) and [error_analysis.md](error_analysis.md).
 
 ## Rules the code follows
 
