@@ -1,49 +1,45 @@
 # Architecture
 
-> Status: **planned design** (Phase 0). Each section is updated when its component is implemented.
-> Trade-offs are explained in [decisions.md](decisions.md).
-
-## Overview
-
 ```
- Documents ─► Ingestion (parse → clean → structure-aware chunk → metadata → embed → upsert/version)
-                        │
-                        ▼
-        Qdrant (vectors + payload metadata) + BM25 index + SQLite (analytics, schedule, approvals)
-                        │
- User ► React UI ► FastAPI ► LangGraph agent ──────────────────────────────┐
-                   1. route intent (policy | contract | sql | action | hybrid)
-                   2. hybrid retrieval (dense + BM25, metadata filters) + rerank
-                   3. tool loop
-                   4. human-approval interrupt before any write
-                   5. grounded answer + citation verification + abstention
-                                                                          │
-                          MCP server exposes the same tools ◄─────────────┘
+ Documents -> Ingestion (parse -> clean -> chunk by sections -> metadata -> embed -> save with version)
+                        |
+                        v
+        Qdrant (vectors + metadata) + BM25 + SQLite (analytics, schedule, approvals)
+                        |
+ User -> React UI -> FastAPI -> LangGraph agent
+                   1. route the question (policy / contract / sql / action / hybrid)
+                   2. search (dense + BM25, filters on platform / version) + rerank
+                   3. call tools (loop if needed)
+                   4. stop and ask for approval before any write action
+                   5. answer with citations, or say "I don't know" if evidence is weak
+
+ The MCP server exposes the same tools to external clients.
 ```
 
-## Components
+## Packages
 
-| Package | Responsibility | Phase |
-|---|---|---|
-| `creatorops.config` | Typed settings from `CREATOROPS_*` env vars | 0 ✅ |
-| `creatorops.ingestion` | Parse PDF/HTML, clean, structure-aware chunking, chunk metadata, content-hash versioning | 1 |
-| `creatorops.indexing` | Embeddings, Qdrant collection, BM25 index | 1–2 |
-| `creatorops.retrieval` | Hybrid fusion, metadata filters (`is_latest`, platform, `as_of`), reranker | 1–2 |
-| `creatorops.llm` | `LLMClient` interface; `ollama` and `fake` providers | 2 |
-| `creatorops.tools` | Plain typed functions: policies, contracts, SQL, compliance, scheduling | 2–3 |
-| `creatorops.agent` | LangGraph graph: router, tool loop, approval interrupt, citation verification | 2–3 |
-| `creatorops.api` | FastAPI endpoints for chat, sources, SQL, approvals, schedule | 2 |
-| `creatorops.mcp_server` | Same tools exposed through the official MCP Python SDK | 3 |
-| `app/` | React + TypeScript UI | 3 |
+| Package | What it does |
+|---|---|
+| `config` | settings from env variables |
+| `ingestion` | read PDF/HTML, clean text, split into chunks, add metadata, handle versions |
+| `indexing` | embeddings, Qdrant collection, BM25 index |
+| `retrieval` | hybrid search, filters, reranker |
+| `llm` | client for Ollama (+ a fake one for tests) |
+| `tools` | policy search, clause search, SQL, compliance check, scheduling |
+| `agent` | LangGraph graph: router, tools, approval step, citation check |
+| `api` | FastAPI endpoints used by the UI |
+| `mcp_server` | MCP server with the same tools |
 
-## Key invariants
+## Rules the code follows
 
-- **Versioning:** a document is identified by `doc_id`. Re-ingesting with a different `content_hash` creates a new `version` and sets `is_latest=false` on the previous one. History is kept. Retrieval filters on `is_latest=true` unless the query asks for a date (`as_of`) or a comparison.
-- **SQL safety:** `run_sql` accepts a single `SELECT` on allowlisted tables, opens the database read-only, and enforces a row limit and a timeout.
-- **Write actions:** the only write tool (`schedule_post`) is reached through a LangGraph interrupt, and no row is written without an explicit approval record.
-- **Citations:** each claim in an answer cites a chunk, clause or query that was actually returned by a tool in that run. Citations are verified before the answer is returned. If the evidence is too weak, the agent abstains.
+- **Versions:** each document has a `doc_id`. If the same document is ingested again with different content
+  (different `content_hash`), a new version is added and the old one gets `is_latest=false`. Old versions are
+  kept. Search only uses the latest version unless the question asks for a date or a comparison.
+- **SQL:** the SQL tool only runs one `SELECT` on known tables, opens the database read-only and limits rows and time.
+- **Write actions:** `schedule_post` is only executed after the user approves it.
+- **Citations:** an answer can only cite chunks / clauses / queries that a tool actually returned.
 
 ## Chunk metadata
 
-`chunk_id, doc_id, doc_type, platform, title, section_path, page, char_start, char_end, doc_date, snapshot_date,
-version, is_latest, source_url, synthetic, content_hash, ingested_at, clause_type (nullable)`
+`chunk_id, doc_id, doc_type, platform, title, section_path, page, char_start, char_end, doc_date,
+snapshot_date, version, is_latest, source_url, synthetic, content_hash, ingested_at, clause_type`

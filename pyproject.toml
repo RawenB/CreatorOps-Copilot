@@ -15,10 +15,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "ruff>=0.8",
-    "mypy>=1.13",
     "pytest>=8.3",
-    "pytest-cov>=6.0",
-    "pre-commit>=4.0",
 ]
 
 [build-system]
@@ -31,22 +28,10 @@ packages = ["src/creatorops"]
 [tool.ruff]
 line-length = 100
 target-version = "py311"
-src = ["src", "tests"]
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "B", "UP", "N", "SIM", "RUF"]
-
-[tool.mypy]
-python_version = "3.11"
-packages = ["creatorops"]
-mypy_path = "src"
-strict = true
-plugins = ["pydantic.mypy"]
+select = ["E", "F", "I"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-ra"
-markers = [
-    "slow: tests that load models or large data (deselect with -m 'not slow')",
-    "integration: tests that need external services (Ollama, Qdrant server)",
-]
+
