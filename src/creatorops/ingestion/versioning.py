@@ -45,7 +45,8 @@ def content_hash(text: str) -> str:
 class Registry:
     def __init__(self, path: Path):
         Path(path).parent.mkdir(parents=True, exist_ok=True)
-        self.conn = sqlite3.connect(path)
+        # check_same_thread=False: the API reads it from worker threads (single user, mostly reads)
+        self.conn = sqlite3.connect(path, check_same_thread=False)
         self.conn.executescript(SCHEMA)
 
     def latest(self, doc_id: str):
