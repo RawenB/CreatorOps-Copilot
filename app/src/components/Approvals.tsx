@@ -6,7 +6,11 @@ import ApprovalCard from './ApprovalCard'
 const FILTERS = ['pending', 'approved', 'rejected', 'all']
 
 // Queue of write actions waiting for a human (from the chat agent or from MCP clients).
-export default function Approvals({ refresh, onChange }: { refresh: number; onChange: () => void }) {
+export default function Approvals({ refresh, onChange, onOpenTicket }: {
+  refresh: number
+  onChange: () => void
+  onOpenTicket: (id: number) => void
+}) {
   const [status, setStatus] = useState('pending')
   const [items, setItems] = useState<Approval[] | null>(null)
   const [busy, setBusy] = useState(false)
@@ -49,7 +53,13 @@ export default function Approvals({ refresh, onChange }: { refresh: number; onCh
       )}
       <div className="card-grid">
         {items?.map((a) => (
-          <ApprovalCard key={a.approval_id} approval={a} busy={busy} onDecide={(ok) => decide(a.approval_id, ok)} />
+          <ApprovalCard
+            key={a.approval_id}
+            approval={a}
+            busy={busy}
+            onDecide={(ok) => decide(a.approval_id, ok)}
+            onOpenTicket={onOpenTicket}
+          />
         ))}
       </div>
     </div>
