@@ -205,7 +205,9 @@ export default function Analytics({ onTicketCreated }: { onTicketCreated: (t: Ti
                     <td className="num">{compact(c.reach)}</td>
                     <td>
                       <div className="inline-bar">
-                        <div style={{ width: `${(c.engagement_rate / best) * 100}%` }} />
+                        <div className="inline-track">
+                          <div style={{ width: `${(c.engagement_rate / best) * 100}%` }} />
+                        </div>
                         <span>{pct(c.engagement_rate)}</span>
                       </div>
                     </td>
