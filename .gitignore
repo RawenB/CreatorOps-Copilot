@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# Secrets / local config
+.env
+*.local.*
+.claude/settings.local.json
+
+# Data (raw corpus and generated artifacts are reproducible via scripts)
+data/raw/
+data/processed/
+data/*.sqlite
+data/*.sqlite-*
+data/qdrant/
+
+# Models, experiment tracking, checkpoints
+models/
+*.safetensors
+*.bin
+*.pt
+*.ckpt
+mlruns/
+mlartifacts/
+wandb/
+checkpoints/
+
+# Eval run outputs (keep summarized reports in reports/)
+eval/runs/
+
+# Frontend
+node_modules/
+app/dist/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
